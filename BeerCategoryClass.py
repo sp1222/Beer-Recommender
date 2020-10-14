@@ -19,7 +19,26 @@ class BeerCategory:
         self.__categoryBeers = []   # a list of BeerClass objects, up to 100 per category
         self.__subCategories = []
         self.__subCategoriesExist = False
-        self.__CategoryManualEditFlag = False
+        self.__categoryWordCount = None
+        self.__categoryFeaturesMatrix = [] # indexes 0 through 18 will be different features of the beer
+        # 0 ABV
+        # 1 Astringency
+        # 2 Body
+        # 3 Alcohol
+        # 4 Bitter
+        # 5 Sweet
+        # 6 Sour
+        # 7 Salty
+        # 8 Dark Fruits
+        # 9 Citrus Fruits
+        # 10 Tropical Fruits
+        # 11 Hoppy
+        # 12 Floral
+        # 13 Spicy
+        # 14 Herbal
+        # 15 Malty
+        # 16 Richness
+        # 17 Yeast
 
 # this node's data setters and adders:
 
@@ -42,13 +61,13 @@ class BeerCategory:
         self.__categoryMinABV = ABV
 
     def setCategoryMaxABV(self, ABV):
-        self.__categoryMaxABV
+        self.__categoryMaxABV = ABV
 
     def setCategoryMinIBU(self, IBU):
         self.__categoryMinIBU = IBU
 
     def setCategoryMaxIBU(self, IBU):
-        self.__categoryMaxIBU
+        self.__categoryMaxIBU = IBU
 
     def setCategory_href(self, href):
         self.__category_href = href
@@ -62,9 +81,8 @@ class BeerCategory:
     def setSubCategoriesExist(self, exist):
         self.__subCategoriesExist = exist
 
-    def setCategoryManualEditFlag(self, flag):
-        self.__CategoryManualEditFlag = flag
-
+    def setCategoryFeaturesMatrix(self, features):
+        self.__categoryFeaturesMatrix = features
 
 # this node's data getters:
 
@@ -110,5 +128,5 @@ class BeerCategory:
     def doSubCategoriesExist(self):
         return self.__subCategoriesExist
 
-    def getCategoryManualEditFlag(self):
-        return self.__CategoryManualEditFlag
+    def getCategoryFeaturesMatrix(self):
+        return self.__categoryFeaturesMatrix

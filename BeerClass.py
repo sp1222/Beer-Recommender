@@ -15,6 +15,26 @@ class Beer:
         self.__beerMaxIBU = 0
         self.__beerReviewsFullContent = []
         self.__beerManualEditFlag = False
+        self.__beerWordCount = None
+        self.__beerFeaturesMatrix = [] # indexes 0 through 18 will be different features of the beer
+        # 0 ABV
+        # 1 Astringency
+        # 2 Body
+        # 3 Alcohol
+        # 4 Bitter
+        # 5 Sweet
+        # 6 Sour
+        # 7 Salty
+        # 8 Dark Fruits
+        # 9 Citrus Fruits
+        # 10 Tropical Fruits
+        # 11 Hoppy
+        # 12 Floral
+        # 13 Spicy
+        # 14 Herbal
+        # 15 Malty
+        # 16 Richness
+        # 17 Yeast
 
     # setters
     def setBeerName(self, name):
@@ -56,6 +76,12 @@ class Beer:
     def setBeerManualEditFlag(self, flag):
         self.__beerManualEditFlag = flag
 
+    def setBeerWordCount(self, wordCount):
+        self.__beerWordCount = wordCount
+
+    def setBeerFeaturesMatrix(self, features):
+        self.__beerFeaturesMatrix = features
+
     # getters
     def getBeerName(self):
         return self.__beerName
@@ -95,4 +121,9 @@ class Beer:
 
     def getBeerManualEditFlag(self):
         return self.__beerManualEditFlag
-        
+
+    def getBeerWordCount(self):
+        return self.__beerWordCount
+
+    def getBeerFeaturesMatrix(self):
+        return self.__beerFeaturesMatrix
