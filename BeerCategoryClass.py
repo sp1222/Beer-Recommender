@@ -32,13 +32,15 @@ class BeerCategory:
         # 8 Dark Fruits
         # 9 Citrus Fruits
         # 10 Tropical Fruits
-        # 11 Hoppy
-        # 12 Floral
-        # 13 Spicy
-        # 14 Herbal
-        # 15 Malty
-        # 16 Richness
-        # 17 Yeast
+        # 11 Vegetable
+        # 12 Hoppy
+        # 13 Herbal
+        # 14 Floral
+        # 15 Smoke and Heat
+        # 16 Spices
+        # 17 Malty
+        # 18 Richness
+        # 19 Yeast
 
 # this node's data setters and adders:
 

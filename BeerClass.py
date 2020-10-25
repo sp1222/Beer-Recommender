@@ -17,24 +17,40 @@ class Beer:
         self.__beerManualEditFlag = False
         self.__beerWordCount = None
         self.__beerFeaturesMatrix = [] # indexes 0 through 18 will be different features of the beer
-        # 0 ABV
-        # 1 Astringency
-        # 2 Body
-        # 3 Alcohol
-        # 4 Bitter
-        # 5 Sweet
-        # 6 Sour
-        # 7 Salty
-        # 8 Dark Fruits
-        # 9 Citrus Fruits
-        # 10 Tropical Fruits
+
+        # 0 Astringency
+        # 1 Body
+        # 2 Alcohol
+        # 3 Bitter
+        # 4 Sweet
+        # 5 Sour
+        # 6 Salty
+        # 7 Fruits
+        # 8 Hoppy
+        # 9 Spices
+        # 10 Malty
+
+
+        # this is for an expanded vision
+        # 0 Astringency
+        # 1 Body
+        # 2 Alcohol
+        # 3 Bitter
+        # 4 Sweet
+        # 5 Sour
+        # 6 Salty
+        # 7 Dark Fruits
+        # 8 Citrus Fruits
+        # 9 Tropical Fruits
+        # 10 Vegetable
         # 11 Hoppy
-        # 12 Floral
-        # 13 Spicy
-        # 14 Herbal
-        # 15 Malty
-        # 16 Richness
-        # 17 Yeast
+        # 12 Herbal
+        # 13 Floral
+        # 14 Smoke and Heat
+        # 15 Spices
+        # 16 Malty
+        # 17 Richness
+        # 18 Yeast
 
     # setters
     def setBeerName(self, name):
