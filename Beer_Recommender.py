@@ -1,25 +1,41 @@
 from bs4 import BeautifulSoup
+from collections import Counter
+from math import pi
 from openpyxl import Workbook
 from openpyxl import load_workbook
+from pprint import pprint
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 import BeerCategoryClass
 import BeerClass
+import itertools as IT
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 import os
 import pandas as pd
+import random
 import re
 import time
 
 # CONSTANTS
 # the starting row of beer information
-REVIEW_START_ROW = 21
-FEATURES_START_ROW = 50
-WORD_COUNT_START_ROW = 70
+BEER_REVIEW_START_ROW = 21
+BEER_FEATURES_START_ROW = 50
+BEER_WORD_COUNT_START_ROW = 70
 
 # the starting row of category information
 CATEGORY_FEATURES_START_ROW = 15
-BEER_REVIEW_COUNT = 41
+CATEGORY_BEER_REVIEW_COUNT = 41
+
+# number of features in a beer
+MAX_NUMBER_OF_FEATURES = 11
+
+# File Names:
+BEER_ALL_INFO = 'Beer_All_Info\\'
+NEW_BEER_ALL_INFO = 'New_Beer_All_Info\\'
+FILE_DIRECTORY = 'D:\\Python Projects\\Beer Recommender Project\\'
 
 # funtion where selenium gathers html from each web page
 def seleniumGetsHTML(site):
@@ -97,7 +113,7 @@ def createWorkbookForAllCategories(root):
             wb = Workbook()
             categoryName = re.sub('\/', 'and', subCategory.getCategoryName())
             addStyleToNewWorkbook(wb, subCategory, 'None', -1, index = 0)
-            fileName = 'Beer_All_Info\\'
+            fileName = NEW_BEER_ALL_INFO
             openFile = fileName + categoryName + '.xlsx'
             wb.save(openFile)
 
@@ -163,65 +179,65 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
 
     ## category features go here.
     currentRow = CATEGORY_FEATURES_START_ROW
-#    if len(currentCategory.getCategoryFeaturesMatrix()) == 11:
-#        feature = currentCategory.getCategoryFeaturesMatrix()
-#        i = 0
+    if len(currentCategory.getCategoryFeaturesMatrix()) == MAX_NUMBER_OF_FEATURES:
+        feature = currentCategory.getCategoryFeaturesMatrix()
+        i = 0
 
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Astringency'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
+        var = sheet.cell(row = currentRow, column = 1)
+        var.value = 'Astringency'
+        var = sheet.cell(row = currentRow, column = 2)
+        var.value = feature[i]
+        currentRow += 1
+        i += 1
         
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Body'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
+        var = sheet.cell(row = currentRow, column = 1)
+        var.value = 'Body'
+        var = sheet.cell(row = currentRow, column = 2)
+        var.value = feature[i]
+        currentRow += 1
+        i += 1
         
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Alcohol'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
+        var = sheet.cell(row = currentRow, column = 1)
+        var.value = 'Alcohol'
+        var = sheet.cell(row = currentRow, column = 2)
+        var.value = feature[i]
+        currentRow += 1
+        i += 1
         
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Bitter'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
+        var = sheet.cell(row = currentRow, column = 1)
+        var.value = 'Bitter'
+        var = sheet.cell(row = currentRow, column = 2)
+        var.value = feature[i]
+        currentRow += 1
+        i += 1
         
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Sweet'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-# #       currentRow += 1
-#        i += 1
+        var = sheet.cell(row = currentRow, column = 1)
+        var.value = 'Sweet'
+        var = sheet.cell(row = currentRow, column = 2)
+        var.value = feature[i]
+        currentRow += 1
+        i += 1
         
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Sour'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
+        var = sheet.cell(row = currentRow, column = 1)
+        var.value = 'Sour'
+        var = sheet.cell(row = currentRow, column = 2)
+        var.value = feature[i]
+        currentRow += 1
+        i += 1
         
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Salty'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
+        var = sheet.cell(row = currentRow, column = 1)
+        var.value = 'Salty'
+        var = sheet.cell(row = currentRow, column = 2)
+        var.value = feature[i]
+        currentRow += 1
+        i += 1
         
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Fruits'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
+        var = sheet.cell(row = currentRow, column = 1)
+        var.value = 'Fruits'
+        var = sheet.cell(row = currentRow, column = 2)
+        var.value = feature[i]
+        currentRow += 1
+        i += 1
         
 #        var = sheet.cell(row = currentRow, column = 1)
 #        var.value = 'Dark Fruits'
@@ -251,12 +267,12 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
 #        currentRow += 1
 #        i += 1
         
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Hoppy'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
+        var = sheet.cell(row = currentRow, column = 1)
+        var.value = 'Hoppy'
+        var = sheet.cell(row = currentRow, column = 2)
+        var.value = feature[i]
+        currentRow += 1
+        i += 1
         
 #        var = sheet.cell(row = currentRow, column = 1)
 #        var.value = 'Herbal'
@@ -279,19 +295,19 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
 #        currentRow += 1
 #        i += 1
         
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Spices'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
+        var = sheet.cell(row = currentRow, column = 1)
+        var.value = 'Spices'
+        var = sheet.cell(row = currentRow, column = 2)
+        var.value = feature[i]
+        currentRow += 1
+        i += 1
         
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Malty'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
+        var = sheet.cell(row = currentRow, column = 1)
+        var.value = 'Malty'
+        var = sheet.cell(row = currentRow, column = 2)
+        var.value = feature[i]
+        currentRow += 1
+        i += 1
         
 #        var = sheet.cell(row = currentRow, column = 1)
 #        var.value = 'Richness'
@@ -311,7 +327,7 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
     var.value = 'Beer Name'
     var = sheet.cell(row = 40, column  = 2)
     var.value = 'Review Count'    
-    currentRow = BEER_REVIEW_COUNT
+    currentRow = CATEGORY_BEER_REVIEW_COUNT
     currentColumn = 1    
     for beer in currentCategory.getCategoryBeers():
         var = sheet.cell(row = currentRow, column  = 1)
@@ -344,6 +360,7 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
         label.value = 'Beer Style'
         var = sheet.cell(row = 3, column = 2)
         var.value = eachItem.getBeerStyle()
+        print(var.value)
         
         label = sheet.cell(row = 4, column = 1)
         label.value = 'Beer Style Key'
@@ -386,7 +403,7 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
 ### BEER FULL REVIEWS HERE
         label = sheet.cell(row = 20, column = 1)
         label.value = 'Reviews:'
-        currentRow = REVIEW_START_ROW
+        currentRow = BEER_REVIEW_START_ROW
         currentColumn = 1
         columnWidth = 100
         for eachReview in eachItem.getBeerReviewsFullContent():
@@ -399,8 +416,8 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
 
 ### BEER FEATURES MATRIX HERE
         # this is where we will save our beer features values
-        currentRow = FEATURES_START_ROW
-        if len(eachItem.getBeerFeaturesMatrix()) == 11:
+        currentRow = BEER_FEATURES_START_ROW
+        if len(eachItem.getBeerFeaturesMatrix()) == MAX_NUMBER_OF_FEATURES:
             feature = eachItem.getBeerFeaturesMatrix()
             i = 0
 
@@ -545,7 +562,7 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
 
 ### BEER WORD COUNTS START HERE
         # word count for each beer from description and reviews saved here
-        currentRow = WORD_COUNT_START_ROW
+        currentRow = BEER_WORD_COUNT_START_ROW
         var = sheet.cell(row = currentRow, column = 1)
         var.value = 'Words'
         var = sheet.cell(row = currentRow, column = 2)
@@ -579,12 +596,11 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
 
 def loadSubCategories(tree):
            
-    fileDirectory = 'D:\Python Projects\Beer Recommender Project\Beer'
     # first we need to see if the name of the categories we want to collect data from exist as files
-    fileList = os.listdir(fileDirectory)
+    fileList = os.listdir(FILE_DIRECTORY + BEER_ALL_INFO)
     print('Gathering File Names..')
     excelFileList = []
-    fileName = 'Beer\\'
+    fileName = BEER_ALL_INFO
     for file in fileList:
         excelFileList.append(fileName + file)  # list of file names
 
@@ -717,7 +733,7 @@ def gatherInformation(index, wb, tempCategory):
             tempItem.setBeerDescription(value)
 
 ### LOAD BEER REVIEWS
-            currentRow = 21
+            currentRow = BEER_REVIEW_START_ROW
             currentColumn = 1
             currentCell = sheet.cell(row = currentRow, column = currentColumn)
             while currentCell.value != '' and currentCell.value != None:
@@ -727,7 +743,7 @@ def gatherInformation(index, wb, tempCategory):
                 currentCell = sheet.cell(row = currentRow, column = currentColumn)
 
 ### LOAD BEER FEATURES
-            currentRow += 5
+            currentRow = BEER_FEATURES_START_ROW
             currentColumn = 2
             currentCell = sheet.cell(row = currentRow, column = currentColumn)
             features = []
@@ -912,7 +928,6 @@ def openSubCategoryPages(currentCategory, dr, site, key):
         beerReviews = thisBeerHTML.findAll('div', {'id': 'rating_fullview_content_2'})
         for each in beerReviews:
             thisBeer.addBeerReviewsFullContent(each.get_text())
-        print(thisBeer.getBeerName() + "   " + str(len(thisBeer.getBeerReviewsFullContent())))
         
         currentCategory.addCategoryBeer(thisBeer)
     
@@ -926,7 +941,7 @@ def openSubCategoryPages(currentCategory, dr, site, key):
     # save to a new excel document after each category is scraped
     # because SPECTRUM...
     wb = Workbook()
-    addToNewWorkbook(wb, currentCategory, currentCategory.getCategoryName(), currentCategory.getCategoryKey(), index = 0)
+    addStyleToNewWorkbook(wb, currentCategory, currentCategory.getCategoryName(), currentCategory.getCategoryKey(), index = 0)
     name = re.sub('\/', 'and',currentCategory.getCategoryName())
     file = 'Scrape\\'
     openFile = file + name + '.xlsx'
@@ -1042,67 +1057,6 @@ def compileWordCounts(root):
             subCategory.setCategoryFeaturesMatrix(subCategoryWordCountDictionary)
     return root
 
-#************************************************************************************************************************************
-# function to save word counts to spreadsheets for each sub category
-
-def sendWordCountToWorkBook(currentBeer, key, sheet):
-    fileDirectory = 'D:\Python Projects\Beer Recommender Project\Beer'
-    # first we need to see if the name of the categories we want to collect data from exist as files
-    fileList = os.listdir(fileDirectory)
-    excelFileList = []
-    fileName = 'Beer\\'
-    for file in fileList:
-        excelFileList.append(fileName + file)  # list of file names
-    
-    # here we will rename each tab after the name of the beer
-    # and insert the data into the workbook in some fasion..
-    # Col A: word
-    # Col B: word count
-    
-    variable = sheet.cell(row = 1, column = 1)
-    variable.value = 'Beer Key'
-    variable = sheet.cell(row = 1, column = 2)
-    variable.value = key
-
-    variable = sheet.cell(row = 2, column = 1)
-    variable.value = 'Words'
-    variable = sheet.cell(row = 2, column = 2)
-    variable.value = 'Counts'
-    
-    currentRow = 3
-    currentColumn = 1
-    for keyVal in currentBeer:
-        currentCell = sheet.cell(row = currentRow, column = currentColumn)
-        # sends word to excel file
-        variable = currentCell
-        variable.value = keyVal[0]
-        currentColumn += 1
-        currentCell = sheet.cell(row = currentRow, column = currentColumn)
-        # sends word count to excel file#
-        variable = currentCell
-        variable.value = keyVal[1]
-        currentRow += 1
-        currentColumn = 1
-        
-def saveWordCountsInCategory(root):
-
-            wb = Workbook()
-            for category in root.getSubCategories():
-                for subCategory in category.getSubCategories():
-                    index = 1
-                    for beer in subCategory.getCategoryBeers():
-                        beerName = beer.getBeerName()
-                        beerName = re.sub('[^A-Za-z]+', ' ', beerName)
-                        wb.create_sheet(index = index, title = beerName)
-                        wb.active = index
-                        sheet = wb.active                  
-                        sendWordCountToWorkBook(beer.getBeerWordCount(), beer.getBeerKey(), sheet)
-                        index += 1
-                    fileName = 'Word Counts\\'
-                    categoryName = re.sub('\/', 'and', subCategory.getCategoryName())
-                    openFile = fileName + categoryName + '.xlsx'
-                    wb.save(openFile)
-
 
 #*************************************************************************************************************************************
 # function to get a combined word count from all beers.  This is to assist with sifting for beer related words manually
@@ -1203,55 +1157,256 @@ def compileFeaturesDefinitions():
 # matrix: [astringent, mouthfeel, alcohol, bitter, sweet, sour, salty, fruity, hoppy, spicy, malty]
 def wordCountToFeatures(root, features):
 
-    matrixOfFeatures = []           # n x 1 matrix
     for category in root.getSubCategories():
         for subCategory in category.getSubCategories():
             for beer in subCategory.getCategoryBeers():   
-                matrixOfFeatures = []           # n x 1 matrix
+                matrixOfBeerFeatures = []           # n x 1 matrix
                 for feature, impact in features.items():
                     magnitudeOfCurrentFeature = 0
                     for word in beer.getBeerWordCount():
                         for key in impact:
                             if word[0] == key:
                                 magnitudeOfCurrentFeature += (int(word[1]) * int(impact[key]))
-                    matrixOfFeatures.append(magnitudeOfCurrentFeature)
-                beer.setBeerFeaturesMatrix(matrixOfFeatures)
+                    matrixOfBeerFeatures.append(magnitudeOfCurrentFeature)
+                beer.setBeerFeaturesMatrix(matrixOfBeerFeatures)
+
+    # here we calculate the features matrix for sub categories or styles
+    # we sum up the features matrices of all beer in the sub category and divide by the number of beers in that sub category or style
+    # we find the mean features matrix that represents the sub category or style.
+
+    for category in root.getSubCategories():
+        for subCategory in category.getSubCategories():
+            matrixOfSubCategoryFeatures = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            for beer in subCategory.getCategoryBeers():
+                matrixOfSubCategoryFeatures = np.add(matrixOfSubCategoryFeatures, beer.getBeerFeaturesMatrix())
+            matrixOfSubCategoryFeatures = matrixOfSubCategoryFeatures // len(subCategory.getCategoryBeers())
+            subCategory.setCategoryFeaturesMatrix(matrixOfSubCategoryFeatures)
+    
     return root
 
+#***************************************************************************************************************************************
+# Functions to gather data on select user inputs and store the data in a file.
+
+def gatherUserInputInformation():
+
+    startPage = 'https://www.beeradvocate.com/'
+    beerURLs = ['beer/profile/148/11436/',      # Scottish Ale 80 Shillings
+                'beer/profile/335/2904/',       # IPA American Mad Hatter
+                'beer/profile/199/178740/',     # IPA American Sculpin Pineapple
+                'beer/profile/31987/194673/',   # Stout Oatmeal Black House Nitro
+                'beer/profile/137/30936/',      # Fruit and Field Apricot
+                'beer/profile/3760/9781/',      # Porter American Coffee Porter
+                'beer/profile/179/71896/',      # Sour - Flanders Oud Bruin Le Serpent Cerise
+                'beer/profile/192/275731/',     # Wheat Beer Witbier Fat Tire Belgian White
+                'beer/profile/8/46767/',        # Pale Ale American Drifter
+                'beer/profile/26762/76498/']    # Porter Imperial Hellfighter
+
+    dummyParent = BeerCategoryClass.BeerCategory()
+    userCategory = BeerCategoryClass.BeerCategory()
+
+    dummyParent.setCategoryName('')
+    dummyParent.setCategoryKey(-1)
+    
+    userCategory.setCategoryName('User Input')
+    userCategory.setCategoryKey(100)
+    userCategory.setCategoryParent(dummyParent)
+    userCategory.setCategoryParentKey(-1)
+
+    key = 9000
+
+    for currentBeerURL in beerURLs:
+        currentSite = startPage + currentBeerURL
+        thisBeerHTML = seleniumGetsHTML(currentSite)
+        key += 1
+        
+        thisBeer = BeerClass.Beer()
+        # since beerName is name of beer and name of brewery on the same string,
+        # we get the the breweryName and sub out of beerName
+        beerName = thisBeerHTML.find('div', {'class': 'titleBar'})
+        breweryName = beerName.find('span').get_text()
+        beerName = beerName.get_text()
+        beerName = re.sub(breweryName, '', beerName)
+        thisBeer.setBeerName(beerName)
+        thisBeer.setBeerBrewery(breweryName)
+        thisBeer.setBeerKey(key)
+        # for finding beer stats
+        beerStats = thisBeerHTML.findAll('dd', {'class': 'beerstats'})
+        beerStyle = beerStats[0].find('a').get_text()
+        thisBeer.setBeerStyle(beerStyle)
+
+        # to get the category key, we will navigate through all of the styles and find the name that matches the name of this beer's style.
+
+        excelList = os.listdir(FILE_DIRECTORY + BEER_ALL_INFO)
+        desiredFile = ''
+        for excel in excelList:
+            if excel == beerStyle:
+                desiredFile = BEER_ALL_INFO + file + '.xlsx'
+                wb = load_workbook(desiredFile)
+                wb.active = 1
+                sheet = wb.active
+                thisBeer.setBeerCategoryKey(sheet.cell(row = 2, column = 2).value) # find a way to fix this
+                break
+        
+
+        
+        abv = cleanupSingleDecimalStrings(beerStats[1].get_text())
+        try:
+            thisBeer.setBeerABV(float(abv))
+        except:
+            print(thisBeer.getBeerName() + ' does not have an ABV on the website.\nSubstituting with the category average ABV')
+            try:
+                thisBeer.setBeerABV((float(minABV) + float(maxABV)) / 2)
+            except:
+                thisBeer.setBeerManualEditFlag(True)
+        thisBeer.setBeerAverageRating(float(beerStats[3].find('span', {'class': 'ba-ravg Tooltip'}).get_text()))
+            
+        # for finding notes
+        notes = thisBeerHTML.find('div', {'style': 'clear:both; margin:0; padding:0px 20px; font-size:1.05em;'})
+        thisBeer.setBeerDescription(notes.get_text())
+#        try:
+#            thisBeer.setBeerMinIBU(float(minIBU))
+#            thisBeer.setBeerMaxIBU(float(maxIBU))
+#        except:
+#            thisBeer.setBeerManualEditFlag(True)
+        # for finding all beer reviews
+        beerReviews = thisBeerHTML.findAll('div', {'id': 'rating_fullview_content_2'})
+        for each in beerReviews:
+            thisBeer.addBeerReviewsFullContent(each.get_text())
+        
+        userCategory.addCategoryBeer(thisBeer)
+
+        
+    invalidWords = []
+    file = open('omitted words.txt', 'r')
+    for word in file:
+        word = re.sub('\n', '', word)
+        invalidWords.append(word)
+        
+    for beer in userCategory.getCategoryBeers():                
+        currentBeerWordCountDictionary = {} # empty dictionary of word count for current beer
+        # gets words from the description of the beer
+        # as stated by the brewery
+        allWords = beer.getBeerDescription()
+        allWords = re.sub('[^A-Za-z]+', ' ', allWords)
+        allWords = allWords.lower()
+        currentWord = ''
+        for c in allWords:
+            if c == ' ' and currentWord != '':
+                            
+                isValid = True
+                for invalid in invalidWords:
+                    if currentWord == invalid:
+                        isValid = False
+                        break
+                                
+                if isValid == True:
+                    if currentWord in currentBeerWordCountDictionary:
+                        count = currentBeerWordCountDictionary[currentWord]
+                        count += 1
+                        currentBeerWordCountDictionary[currentWord] = count
+                    else:
+                        currentBeerWordCountDictionary[currentWord] = 1
+                currentWord = ''
+                            
+            else:
+                currentWord += c
+                            
+        # then we get the words from all of the reviews
+        # left by users on BeerAdvocate
+        for review in beer.getBeerReviewsFullContent():
+            allWords = review
+            allWords = re.sub('[^A-Za-z]+', ' ', allWords)
+            allWords = allWords.lower()
+            currentWord = ''
+            for c in allWords:
+                if c == ' ' and currentWord != '':
+                                
+                    isValid = True
+                    for invalid in invalidWords:
+                        if currentWord == invalid:
+                            isValid = False
+                            break
+
+                    if isValid == True:
+                        if currentWord in currentBeerWordCountDictionary:
+                            count = currentBeerWordCountDictionary[currentWord]
+                            count += 1
+                            currentBeerWordCountDictionary[currentWord] = count
+                        else:
+
+                            currentBeerWordCountDictionary[currentWord] = 1
+                    currentWord = ''
+                else:
+                    currentWord += c
+        currentBeerWordCountDictionary = sorted(currentBeerWordCountDictionary.items(), key=lambda x: x[1], reverse=True)
+        beer.setBeerWordCount(currentBeerWordCountDictionary)
+
+                
+    beerFeatures = compileFeaturesDefinitions()
+    
+    for beer in userCategory.getCategoryBeers():   
+        matrixOfBeerFeatures = []           # n x 1 matrix
+        for feature, impact in beerFeatures.items():
+            magnitudeOfCurrentFeature = 0
+            for word in beer.getBeerWordCount():
+                for key in impact:
+                    if word[0] == key:
+                        magnitudeOfCurrentFeature += (int(word[1]) * int(impact[key]))
+            matrixOfBeerFeatures.append(magnitudeOfCurrentFeature)
+        beer.setBeerFeaturesMatrix(matrixOfBeerFeatures)
+
+    wb = Workbook()
+    addStyleToNewWorkbook(wb, userCategory, userCategory.getCategoryName(), userCategory.getCategoryKey(), index = 0)
+    name = re.sub('\/', 'and',userCategory.getCategoryName())
+    file = 'Scrape\\'
+    openFile = file + name + '.xlsx'
+    wb.save(openFile)
+
+
+
+#********************************************************************************************************************************
 # this function loads the basic information for all 5700 beer for machine learning application
-def loadBeerInformation():
+# with the option to load user beer input from file as well.
+def loadBeerInformation(getUser = False, getCategoryDictionary = False):
 
     beerList = []
-    fileDirectory = 'D:\Python Projects\Beer Recommender Project\Beer_All_Info'
+    if getCategoryDictionary == True:
+        dictionary = {}
+
     # first we need to see if the name of the categories we want to collect data from exist as files
-    fileList = os.listdir(fileDirectory)
+    fileList = os.listdir(FILE_DIRECTORY + BEER_ALL_INFO)
     print('Gathering File Names..')
-    excelFileList = []
-    fileName = 'Beer_All_Info\\'
+    fileName = BEER_ALL_INFO
     for file in fileList:
+        wb = load_workbook(fileName + file)
+        if getCategoryDictionary == True:
+            index = 0
+            wb.active = index
+            sheet = wb.active
+            dictionary[float(sheet.cell(row = 2, column = 2).value)] = str(sheet.cell(row = 1, column = 2).value)
+        
         index = 1
-        excelFileList.append(fileName + file)  # list of file names
-        wb = load_workbook(excel)
+        print('Getting beer information from ' + file)
         while index < len(wb.worksheets):
-            beer = BeerClass.Beer()
+            beer = BeerClass.Beer()            
             wb.active = index
             sheet = wb.active
             currentRow = 1
             currentColumn = 2
             currentCell = sheet.cell(row = currentRow, column = currentColumn)
-            beer.getBeerName(currentCell.value)
+            beer.setBeerName(re.sub('\n','',currentCell.value))
             currentRow += 1
             currentCell = sheet.cell(row = currentRow, column = currentColumn)
-            beer.getBeerKey(int(currentCell.value))
+            beer.setBeerKey(int(currentCell.value))
             currentRow += 1
             currentCell = sheet.cell(row = currentRow, column = currentColumn)
-            beer.setBeerStyle(currentCell.value)
+            beer.setBeerStyle(re.sub('\n','',currentCell.value))
             currentRow += 1
             currentCell = sheet.cell(row = currentRow, column = currentColumn)
             beer.setBeerCategoryKey(int(currentCell.value))
             currentRow += 1
             currentCell = sheet.cell(row = currentRow, column = currentColumn)
-            beer.setBeerBrewery(currentCell.value)
+            beer.setBeerBrewery(re.sub('\n','',currentCell.value))
             currentRow += 1
             currentCell = sheet.cell(row = currentRow, column = currentColumn)
             beer.setBeerAverageRating(float(currentCell.value))
@@ -1266,48 +1421,543 @@ def loadBeerInformation():
             beer.setBeerMaxIBU(int(currentCell.value))
 
             features = []
-            currentRow = FEATURES_START_ROW
+            currentRow = BEER_FEATURES_START_ROW
             currentCell = sheet.cell(row = currentRow, column = currentColumn)
-            while currentCell.value != '' or currentCell.value != None:
-                features.append(currentCell.value)
+            while currentCell.value != '' and currentCell.value != None:
+                features.append(int(currentCell.value))
                 currentRow += 1
                 currentCell = sheet.cell(row = currentRow, column = currentColumn)
             beer.setBeerFeaturesMatrix(features)
-        beerList.append(beer)
-    return beerList
-        
-#***********************************************************************************************************************************
-# menu options.
+            beerList.append(beer)
+            index += 1
 
-
-def mainMenuOptions():
-
-    choice = -1
-    while choice < 0 or choice > 2:
-        print('\nBeer Recommender Project')
-        print('What operation are we running?')
-        print('0. QUIT')
-        print('1. Data Collection: web scraping, saving, and loading all beer data')
-        print('2. Data Options: clustering and graphing using some beer data')
-
-### Need a word counter put together with a means to save the word counter
-### Need a key re-assignment for all beer, because we had to scrape data in multiple sessions there are multiple keys being reused.
-# need a try except here.
-        try:
-            choice = int(input())
-        except:
-            print('\nInvalid choice, please choose wisely.')
-        if(choice == 1):
-            treeMenuOptions()
-        elif(choice == 2):
-            dataMenuOptions()
-
-        if choice != 0:
-            choice = -1
-        else:
-            break
+    if getUser == True:
             
+        userInputFile = 'User Input\\User Input.xlsx'
+        wb = load_workbook(userInputFile)
+        index = 1
+        wb.active = index
+        sheet = wb.active
 
+        userBeerList = []
+        userCV = []
+
+        while index < len(wb.worksheets):        
+            beer = BeerClass.Beer()
+            beerCV = BeerClass.Beer()
+            wb.active = index
+            sheet = wb.active
+            currentRow = 1
+            currentColumn = 2
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerName(re.sub('\n','',currentCell.value))
+            beerCV.setBeerName(re.sub('\n','',currentCell.value) + ' :: Cross Validation')
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerKey(int(currentCell.value))
+            beerCV.setBeerKey(int(currentCell.value))
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerStyle(re.sub('\n','',currentCell.value))
+            beerCV.setBeerStyle(re.sub('\n','',currentCell.value) + ' :: Cross Validation')
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerCategoryKey(int(currentCell.value))
+            beerCV.setBeerCategoryKey(int(currentCell.value))
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerBrewery(re.sub('\n','',currentCell.value))
+            beerCV.setBeerBrewery(re.sub('\n','',currentCell.value))
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerAverageRating(float(currentCell.value))
+            beerCV.setBeerAverageRating(float(currentCell.value))
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerABV(float(currentCell.value))
+            beerCV.setBeerABV(float(currentCell.value))
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerMinIBU(int(currentCell.value))
+            beerCV.setBeerMinIBU(int(currentCell.value))
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerMaxIBU(int(currentCell.value))
+            beerCV.setBeerMaxIBU(int(currentCell.value))
+
+            features = []
+            featuresCV = []
+            currentRow = BEER_FEATURES_START_ROW
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            while currentCell.value != '' and currentCell.value != None:
+                features.append(int(currentCell.value))
+                featuresCV.append(int(currentCell.value + 1))
+                currentRow += 1
+                currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerFeaturesMatrix(features)
+            beerCV.setBeerFeaturesMatrix(features)
+            userBeerList.append(beer)
+            userCV.append(beerCV)
+            index += 1
+        if getCategoryDictionary == True:
+            return beerList, userBeerList, userCV, dictionary
+        else:
+            return beerList, userBeerList, userCV
+    return beerList
+
+###*******************************************************************************************************************************
+# Functions to run K Nearest Neighbor
+
+# data will be a dictionary of beer, with beer keys being key and values being features
+# predict is the user's chosen beer to compare with
+# k is the number of neighbors we will be looking for.
+
+
+def calculateEuclideanDistance(data, predict):
+
+    euclideanDistance = np.linalg.norm(np.array(data) - np.array(predict))
+
+    return euclideanDistance
+
+
+#*****************************************************************************************************************************
+# calculates all neighbors from data in dictionaries
+
+def calculateAllNN(data, predict):
+
+    results = {}
+
+    # iterate through each user input of enjoyed beers
+    for ukey, uval in predict.items():
+        distances = []
+
+        # for each of the 5600 beers in our data, determine the distance between the current user input
+        for bkey, bval in data.items():
+            distances.append([calculateEuclideanDistance(bval, uval), bkey, bval])
+            
+        # sort by shortest distance to the current user input
+        distances = sorted(distances)
+
+        ukeyValues = {}
+        for dist in distances:
+            ukeyValues.update({dist[1]: dist[0]})
+        results.update({ukey: ukeyValues})
+    return results
+
+#**********************************************************************************************************************************
+# Function to find the common k number of beers to be recommended based on euclidean distance of three sub features calculated separately.
+
+def getKNearestNeighborsAcrossSubFeatures(mouth, taste, flavor, aBeer, k, userInput):
+
+    # Note: because the dictionaries of user input beer in mouth, taste, and flavor are already sorted by distance
+    # we only need to create an array of the beer key values.
+    # dict will have { uPred : { id : [mouthfeelDist, tasteDist, flavorDist]} }
+
+    kDict = {}
+    for uPred in userInput:
+        # unpack beer keys from each sub feature data set.
+        currentKeyInMouthData = []
+        # first we unpack the sub features dictionaries.
+        for key, values in mouth.items():
+            if key == uPred.getBeerKey():
+                for bKey, bVal in values.items():
+                    currentKeyInMouthData.append([bKey, bVal])
+
+        currentKeyInTasteData = []
+        # first we unpack the sub features dictionaries.
+        for key, values in taste.items():
+            if key == uPred.getBeerKey():
+                for bKey, bVal in values.items():
+                    currentKeyInTasteData.append([bKey, bVal])
+
+        currentKeyInFlavorData = []
+        # first we unpack the sub features dictionaries.
+        for key, values in flavor.items():
+            if key == uPred.getBeerKey():
+                for bKey, bVal in values.items():
+                    currentKeyInFlavorData.append([bKey, bVal])
+
+
+        # here we are getting the first k-modes across all features.
+        kIDs = []
+        currentIndex = 0
+        matrix = np.array([currentKeyInMouthData[currentIndex][0], currentKeyInTasteData[currentIndex][0], currentKeyInFlavorData[currentIndex][0]])
+
+        atK = False
+        while atK == False:
+            currentIndex += 1
+            # we are now looking for k number of nearest neighbors.
+            # we add a row of beer id's each time we do not have k common neighbors across the three columns in the matrix
+            # and repeat until we have k common beer across each column in the matrix.
+            # once we find k nearest neighbors, we break out of the loop and return the results.
+
+            # returning the first k set of ID's that reaches k.
+            u, c = np.unique(matrix, return_counts=True)
+            kIDs = u[c == 3]
+            if len(kIDs) >= k:
+                atK = True
+                break
+            else:
+                # if we do not have k common beer ids to return, add the next row from each feature column
+                newRow = np.array([currentKeyInMouthData[currentIndex][0], currentKeyInTasteData[currentIndex][0], currentKeyInFlavorData[currentIndex][0]])
+                matrix = np.vstack([matrix, newRow])
+
+        # here we print k result.
+        uPredData = {}
+        for index in kIDs:
+
+            allData = []
+            for m in currentKeyInMouthData:
+                if m[0] == index:
+                    allData.append(m[1])
+                    break
+            for t in currentKeyInTasteData:
+                if t[0] == index:
+                    allData.append(t[1])
+                    break
+            for f in currentKeyInFlavorData:
+                if f[0] == index:
+                    allData.append(f[1])
+                    break
+                
+            uPredData.update({index: allData})
+            
+        kDict.update({uPred.getBeerKey(): uPredData})
+    return kDict        
+
+
+#**********************************************************************************************************************************
+# functions to print recommendations based on each  userPredict beer.
+
+def printBNearestNeighbors(data, aBeer, k, userInput):
+
+    for dKey, dVal in data.items():
+        knn = {}
+        currentUserInputBeer = BeerClass.Beer()
+        for userIn in userInput:
+            if userIn.getBeerKey() == dKey:
+                currentUserInputBeer = userIn
+                break
+        print('*************************************************************')
+        print('\nRecommendations based on ' + currentUserInputBeer.getBeerName())
+        print('Style:        ' + currentUserInputBeer.getBeerStyle())
+        print(currentUserInputBeer.getBeerFeaturesMatrix())
+        # match the key collected from allNN result to the list of beers that are in the allBeer list and print the data.
+        counter = 0
+        atK = False
+        knn.update({currentUserInputBeer.getBeerName(): currentUserInputBeer.getBeerFeaturesMatrix()})
+        for bkey, bvalues in dVal.items():
+            for beer in aBeer:
+                if bkey == beer.getBeerKey():
+                    print('\nName:         ' + str(beer.getBeerName()))
+                    print('Style:        ' + str(beer.getBeerStyle()))
+                    print('Feature Dist: ' + str(bvalues))
+                    print(beer.getBeerFeaturesMatrix())
+                    knn.update({beer.getBeerName(): beer.getBeerFeaturesMatrix()})
+                    counter += 1
+                    if counter == k:
+                        atK = True
+                    break
+            if atK == True:
+                break
+        graphRecommendations(knn)
+#   knn = {'user Input Beer 1 Name': { 'user Input Beer 1 Name': [user input features]}, {'Recommendation 1': [recommendation 1 features]}, ..., {'Recommendation N': [recommendation N features]}}
+#    return knn
+
+
+#**********************************************************************************************************************************
+# functions to print recommendations based on each  userPredict beer.
+
+def printKNearestNeighborsFromSubFeatures(data, aBeer, k, userInput):
+
+    for dKey, dVal in data.items():
+        currentUserInputBeer = BeerClass.Beer()
+        for userIn in userInput:
+            if userIn.getBeerKey() == dKey:
+                currentUserInputBeer = userIn
+                break
+        print('*************************************************************')
+        print('\nRecommendations based on ' + currentUserInputBeer.getBeerName())
+        print('Style:        ' + currentUserInputBeer.getBeerStyle())
+        print(currentUserInputBeer.getBeerFeaturesMatrix())
+        counter = 0
+        atK = False
+        for bkey, bvalues in dVal.items():
+            for beer in aBeer:
+                if bkey == beer.getBeerKey():
+                    print('\nName:         ' + str(beer.getBeerName()))
+                    print('Style:        ' + str(beer.getBeerStyle()))
+                    print('Feature Dist: ' + str(bvalues))
+                    print('Actual Dist:  ' + str(calculateEuclideanDistance(beer.getBeerFeaturesMatrix(), currentUserInputBeer.getBeerFeaturesMatrix())))
+                    print(beer.getBeerFeaturesMatrix())
+                    counter += 1
+                    if counter == k:
+                        atK = True
+                    break
+            if atK == True:
+                break
+
+# function for printing k neighbors across sub features
+# here we do not need to indicate k as it is already taken into account finding the recommendations in:
+# getKNearestNeighborsAcrossSubFeatures(mouth, taste, flavor, aBeer, k, userInput)
+def printKNearestNeighborsAcrossAllSubFeatures(data, aBeer, userInput):
+
+    for dKey, dvalues in data.items():
+        currentUserInputBeer = BeerClass.Beer()
+        for userIn in userInput:
+            if userIn.getBeerKey() == dKey:
+                currentUserInputBeer = userIn
+                break
+        print('*************************************************************')
+        print('\nRecommendations based on ' + currentUserInputBeer.getBeerName())
+        print('Style:               ' + currentUserInputBeer.getBeerStyle())
+        print(currentUserInputBeer.getBeerFeaturesMatrix())
+        for bKey, bVal in dvalues.items():
+            for beer in aBeer:
+                if bKey == beer.getBeerKey():
+                    print('\nName:                  ' + str(beer.getBeerName()))
+                    print('Style:                 ' + str(beer.getBeerStyle()))
+                    print('Dist Mouthfeel:        ' + str(bVal[0]))
+                    print('Dist Taste:            ' + str(bVal[1]))
+                    print('Dist Flavor and Aroma: ' + str(bVal[2]))
+                    print('Actual Dist:           ' + str(calculateEuclideanDistance(beer.getBeerFeaturesMatrix(), currentUserInputBeer.getBeerFeaturesMatrix())))
+                    print(beer.getBeerFeaturesMatrix())
+                    break
+            
+#******************************************************************************************************************
+# Graphing functions
+
+
+def graphRecommendations(data):
+    fig = plt.figure(figsize = (12, 12))
+    ax = plt.subplot(polar = 'True')    
+    MAX_NUMBER_OF_FEATURES = 11
+    featureLabels = ['Astringency', 'Body', 'Alcoholic', 'Bitter', 'Sweet', 'Sour', 'Salty', 'Fruity', 'Hoppy', 'Spice', 'Malty']   
+    color = ['red', 'green', 'blue', 'yellow', 'cyan', 'magenta', 'brown', 'coral', 'darkgreen', 'gold', 'fuchsia', 'lightblue', 'maroon', 'teal', 'violet']
+    currentColor = -1
+    dataNames = []
+    title = list(data.keys())[0]
+    # here we unpack our data.
+#   knn = {'user Input Beer 1 Name': [[user input features], {'Recommendation 1': [recommendation 1 features]}, ... , {'Recommendation N': [recommendation N features]}]}
+    for name, features in data.items():
+        dataNames.append(name)      # for legend chart
+        # next we need to caluclate the angles for each feature
+        angles = [n / float(MAX_NUMBER_OF_FEATURES) * 2 * pi for n in range(MAX_NUMBER_OF_FEATURES)]
+        try:
+            # we need to complete the polygon by adding the starting feature at the end.
+            features += features[:1]
+            # and we need to repate the first value to complete the circle
+            angles += angles[:1]
+        except:
+            print('an error occurred in graphing')
+            continue
+        try:
+            currentColor += 1
+            plt.polar(angles, features, marker = '.', color = color[currentColor], label = name)
+            
+        except:
+            print('something happened in plt.polar')
+            continue
+#   Fills the polygon that has been drawn onto the grid.
+#    plt.fill(angles, features, alpha = 0.1)
+
+        plt.xticks(angles[:-1], featureLabels)
+    
+    ax.set_rlabel_position(0)
+    plt.yticks([25, 50, 75, 100, 125, 150], color = 'grey', size = 10)
+    plt.ylim(0, 200)
+    plt.title(title)
+    legend = ax.legend(loc = 'upper right')
+    fig.savefig('recommendations for ' + title + '.png')
+    plt.show()
+
+
+#******************************************************************************************************************
+# function to classify the user input's beer style using KNN
+# this function returns KNN distances and classification label.
+
+def classifyNewBeerUsingBeerObjects(aBeer, nBeer, k):    
+
+    distancesAll = []
+    for beer in aBeer:
+    # distancesAll = [euclideanDistance, beerKey, beerStyleKey]
+        distancesAll.append([calculateEuclideanDistance(beer.getBeerFeaturesMatrix(), nBeer.getBeerFeaturesMatrix()), beer.getBeerKey(), beer.getBeerStyle()])
+    distancesSorted = sorted(distancesAll)   # sort the distances by distance from shortest to longest
+    distancesKNN = distancesSorted[:k]
+    distancesKNN = np.array(distancesKNN)
+    mostLabelsInDistancesKNN = Counter(distancesKNN[:,2]).most_common(1)[0][0]
+    
+    return distancesKNN, mostLabelsInDistancesKNN
+
+
+#*********************************************************************************************************************
+# Data Setup for KNN algorithms:
+# Set up our numpy arrays for KNN algorithms
+# beerFeatures = [x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11]
+# beerStyle = [y]
+# where xN is the feature from the features matrix
+
+def dataSetup(listOfBeerIn, yAvailable = False):
+
+    beerFeatures = np.empty(11)
+    if yAvailable == True:
+        beerStyle = np.empty(1)
+    
+    for beer in listOfBeerIn:
+        xrow = np.array(beer.getBeerFeaturesMatrix())
+#        print('xrow.shape')#
+#        print(xrow.shape)
+#        print('beerFeatures.shape before stacking')
+#        print(beerFeatures.shape)
+        beerFeatures = np.vstack((beerFeatures, xrow))        
+#        print('beerFeatures.shape after stacking')
+#        print(beerFeatures.shape)
+        if yAvailable == True:
+            yrow = np.array(beer.getBeerCategoryKey())
+            beerStyle = np.vstack((beerStyle, yrow))
+
+    # we need to delete the first row that came from np.empty, I guess..
+
+    beerFeatures = np.delete(beerFeatures, 0, 0)
+    if yAvailable == True:
+        beerStyle = np.delete(beerStyle, 0, 0)
+
+    if yAvailable == True:
+        return beerFeatures, beerStyle
+    return beerFeatures
+        
+
+#*******************************************************************************************************************
+# classify beer using a list of type [array(beer.getBeerFeaturesMatrix()), style key]
+# this will hopefully save some time.
+
+def getSortedDistancesUsingNumpy(aBeer, nBeer, style):
+
+
+    # calculate euclidean distance between new beer and each beer in all beer.
+    euclideanDistance = np.array([ np.linalg.norm(a - nBeer) for a in aBeer])
+    euclideanDistance = euclideanDistance.reshape((euclideanDistance.shape[0], 1))
+    # aftcalculating euclidean distance, we append the corresponding styles to the array.
+    distancesAll = np.append(euclideanDistance, style, axis = 1)
+    distancesSorted = distancesAll[distancesAll[:,0].argsort()]   # sort the distances by distance from shortest to longest
+    return distancesSorted
+    
+
+#********************************************************************************************************************
+# Optimizing K
+
+def optimizeKUsingNumpy(data, style, maxTrainingLabelsCount):
+
+    highestAccuracyAtK = [0] * len(data)
+    accuracyLimit = .8
+    K = []
+#    counter = -1
+    for currentData, currentStyle in zip(data, style):
+#        counter += 1
+#        print('\nOptimizing K using data at index ' + str(counter))
+#        print('currentStyle')
+#        print(currentStyle)
+        allSortedDistances = getSortedDistancesUsingNumpy(data, currentData, style)[1:]
+        currentK = []        
+        for k in range(1, len(data)):      
+            distancesKNN = allSortedDistances[:k]
+            labelsKNN = np.array(distancesKNN)[:,-1]
+            correctLabelsCounted = (labelsKNN == currentStyle).sum()      
+            total = len(distancesKNN)
+            accuracy = correctLabelsCounted / total
+#            if accuracy >= accuracyLimit:  # we will omit k with accuracies less than accuracyLimit
+            currentK.append([accuracy, k, currentStyle])
+            if accuracy > highestAccuracyAtK[k]:
+                highestAccuracyAtK[k] = accuracy
+        # once we reach the maximum number of labels in the data set, accuracy will only decline from here, so we break
+            if correctLabelsCounted == maxTrainingLabelsCount:
+                break
+
+        currentK = sorted(currentK, reverse = True)
+#        print('Best Accuracies and K:  ')
+#        print('Accuracy  k')
+#        print(currentK[0])
+        if currentK[0][1] not in K and currentK[0][0] > accuracyLimit:
+            K.append(int(currentK[0][1]))
+    # here we want to get the most common accuracy for each k in K from frequencyOfAccuracyAtEachK.      
+    fig, ax = plt.subplots()
+    accLength = 100
+    ax.plot(range(1, accLength), highestAccuracyAtK[1:accLength])
+    ax.set(xlabel = 'k values', ylabel = 'accuracy at k', title = 'Accuracy of a value k during Training')
+    ax.grid()
+    fig.savefig('Accuracy of a value k during Training.png')
+    plt.show()
+    K = sorted(K)
+    print('\nOptimized K values based on highest accuracy: ')
+    print(K)
+    return K
+    
+
+#***************************************************************************************
+# function to test our optimized K values
+
+def testOptimizedKUsingNumpy(data, style, K):
+
+    # results will be [[k, highest accuracy, average accuracy, lowest accuracy]]    
+    highestAccuracyAtK = []
+    for k in K:
+        highestAccuracyAtK.append([k, float(0)])
+#    indexCounter = -1
+    for currentData, currentStyle in zip(data, style):
+#        indexCounter += 1
+#        print('\nTesting K using data at index ' + str(indexCounter))
+#        print('currentStyle')
+#        print(currentStyle)        
+        allSortedDistances = getSortedDistancesUsingNumpy(data, currentData, style)[1:]
+        currentK = []
+        accuracyIndexer = -1
+        for k in K:
+            accuracyIndexer += 1              
+            distancesKNN = allSortedDistances[:k]            
+            labelsKNN = np.array(distancesKNN)
+            correctLabelsCounted = (labelsKNN == currentStyle).sum()                  
+            total = len(distancesKNN)
+            accuracy = correctLabelsCounted / total    
+            currentK.append([accuracy, k])
+            if highestAccuracyAtK[accuracyIndexer][1] < accuracy:
+                highestAccuracyAtK[accuracyIndexer][1] = float(accuracy)
+        currentK = sorted(currentK, reverse = True)        
+#        print('Best Accuracies and K:  ')
+#        print('Accuracy    k')
+#        print(np.array(currentK))
+    print('\nHighest accuracies at K')
+    print(np.array(highestAccuracyAtK))
+    fig, ax = plt.subplots()
+    accLength = 40
+    x = np.array(highestAccuracyAtK)[:, 0]
+    y = np.array(highestAccuracyAtK)[:, 1]
+    ax.plot(x, y)
+    ax.set(xlabel = 'k values', ylabel = 'accuracy at k', title = 'Testing Accuracy of optimized k values')
+    ax.grid()
+    fig.savefig('Testing Accuracy of optimized k values.png')
+    plt.show()
+    K = sorted(K)
+    print('\nOptimized K values based on highest accuracy: ')
+    print(K)
+
+#**************************************************************************************************
+# Function to classify a new beer based on optimized K nearest neigbors.
+
+def classifyANewBeerUsingNumpy(aBeerFeatures, aBeerStyles, uBeerFeatures, K):
+    
+    allSortedDistances = getSortedDistancesUsingNumpy(aBeerFeatures, uBeerFeatures, aBeerStyles)
+    accuracyIndexer = -1
+    mostCommonStylesAtK = []
+    for k in K:
+        distancesKNN = allSortedDistances[:k]
+        labelsKNN = np.array(distancesKNN) 
+        mostLabelsInDistancesKNN = Counter(labelsKNN[:,1]).most_common(1)
+        mostCommonStylesAtK.append([k, mostLabelsInDistancesKNN[0][0]])
+    return mostCommonStylesAtK
+    
+#******************************************************************************************************************
+# Main Menu Functions
+    
 def treeMenuOptions():
     # our tree object where we append the nodes and their respective data values.
     BeerCategoryTree = BeerCategoryClass.BeerCategory()
@@ -1316,15 +1966,16 @@ def treeMenuOptions():
     
     choice = -1
     while choice < 0 or choice > 7:
-        print('Data Collection')
+        print('\nData Collection')
         print('0. Go back: this will erase all loaded data')
-        print('1. Build Empty Tree: scrape website for beer styles to build empty tree')
-        print('2. Load Tree: AFTER building tree, load information from files\n   for all beer and beer styles into the tree')
+        print('1. Build Empty Tree: build empty tree used to scrape website for information')
+        print('2. Load Tree: load information from files for all beer styles and beer into the tree')
         print('3. Print Category Tree: print the tree of beer styles and unique keys to screen')
         print('4. Save Tree: save the tree to multiple excel files')
-        print('5. Scrape for Items: scrape website for items in each category\n   and add to the tree.  This also saves the data during the process')
-        print('6. Manual Key Reassignment: reassigns keys to each beer\n   due to internet interruptions, multiple beers may have the same key')
+        print('5. Scrape for Items: scrape website for items in each category and add to empty tree.\n   This also saves the data during the process incase of internet drops')
+        print('6. Manual Key Reassignment: reassigns keys to each beer in saved files\n   Due to internet interruptions, multiple beers may have the same key')
         print('7. Word Count Options: display a list of options for word counts')
+        print('8. Get User Input Beer: scrape information for user input beer and store in file')
         try:
             choice = int(input())
         except:
@@ -1342,6 +1993,19 @@ def treeMenuOptions():
             print('\nTree has been built!')
             
         elif(choice == 2):
+            # if option two is chosen and the tree has not been built, build the tree first.
+            if BeerCategoryTree.getCategoryKey() == -1:
+                beerURL = 'https://www.beeradvocate.com'
+                print('\nBuilding category tree..\n')
+                # gets the html via selenium and beautifulsoup combination
+                # since we are starting a '/beer/styles', we will go ahead and append that
+                # here to get the html for that page.
+                customStartingPoint = '/beer/styles'
+                soupSource = seleniumGetsHTML(beerURL + customStartingPoint)
+                # get the tree's starting node.
+                BeerCategoryTree = buildTree(soupSource, beerURL)
+                print('\nTree has been built!')
+                
             print('\nLoading beer information into initialized tree from workbooks..')
             BeerCategoryTree = loadSubCategories(BeerCategoryTree)
             
@@ -1368,85 +2032,411 @@ def treeMenuOptions():
             print('\nKey reassignment complete!')
             
         elif(choice == 7):
-            featuresDefinitions = []
+            
             wordBankChoice = -1
             while wordBankChoice < 0 or wordBankChoice > 4:
                 wordBankChoice = -1
+                print('\nWord Count Options')
                 print('0. Go Back')
                 print('1. Compile Word Counts')
-                print('2. Save Word Counts to a separate file')
-                print('3. Save to combined word count file')
-                print('4. Compile features matrix based on keyword data bank')
+                print('2. Save Word Counts to a separate file - NOT YET AVAILABLE')
+                print('3. Save combined word count to file')
+                print('4. Compile features matrix based on keywords')
                 try:
                     wordBankChoice = int(input())
                 except:
                     print('\nInvalid choice, please choose wisely.')
                 if wordBankChoice == 1:
+                    print('\nCompiling Word Counts, this will take a few minutes..')
                     BeerCategoryTree = compileWordCounts(BeerCategoryTree)
+                    print('\nWord Count Compile Complete!')
                 elif wordBankChoice == 2:
-                    saveWordCountsInCategory(BeerCategoryTree)
+#                    saveWordCountsInCategory(BeerCategoryTree)
+                    print('\nThis option is not yet available')
                 elif wordBankChoice == 3:
+                    print('\nSaving Combined Word Count..')
                     combineWordCounts(BeerCategoryTree)
                 elif wordBankChoice == 4:
+                    print('\nLoading Features Definitions..')
                     beerFeatures = compileFeaturesDefinitions()
+                    print('\nConverting Word Counts To Features, this will take a few minutes..')
                     wordCountToFeatures(BeerCategoryTree, beerFeatures)
+                    print('\nConverting Word Counts To Features Complete!')
                 if wordBankChoice != 0:
                     wordBankChoice = -1
                 else:
                     break
+
+        if choice == 8:
+            print('\nGetting User Input Information..')
+            gatherUserInputInformation()
+            print('\nUser Input Information gathered!')
+
+                
         if choice != 0:
             choice = -1
         else:
-            break
-
-        
+            break        
 
 # Main Menu Option 2
 def dataMenuOptions():
-    # our list of all beer objects
-    allBeer = []    
+   
+    # empty dictionaries of recommendations based on neighbors to userPredict based on different sets of features.
+    # our lists of beer objects
+    userInput = userCrossValidation = allBeer = []
+    categoryDictionary = {}
+    optimizedK = None
+    knnResult = []
+    knnResultingLabel = None    
     choice = -1
     while choice < 0 or choice > 2:
-        print('Data Options')
+        print('\nData Options')
         print('0. Go back: this will erase all loaded data')
-        print('1. Load Beer Information: load information for all beer from files\n   Name, Key, Style, Brewery, Average Rating, ABV, MIN MAX IBU, Features Matrix')
-        print('2. K-Means Clustering Methods: options to send beer features matrix through clustering algorithms')
-        print('3. ')
+        print('1. Load Beer Information: load collected beer, user input, and cross validation information')
+        print('2. KNN Operations: options for running KNN operations')
+
+
         try:
             choice = int(input())
         except:
             print('\nInvalid choice, please choose wisely.')
-        if(choice == 1):
-            allBeer = loadBeerInformation()
-        elif(choice == 2):
-            clusterChoice = -1
-            while clusterChoice < 0 or clusterChoice > 3:
-                print('0. Go back: this will erase all loaded data')
-                print('1. Run K-Means Clustering on Mouthfeel Features')
-                print('2. Run K-Means Clustering on Taste Features')
-                print('3. Run K-Means Clustering on Flavor Features')                
+        if choice == 1:
+            print('\nLoading Beer Information..')
+            
+            allBeer, userInput, userCrossValidation, categoryDictionary = loadBeerInformation(getUser = True, getCategoryDictionary = True)
+            AllBeerDict = {}
+            for beer in allBeer:
+                AllBeerDict[beer.getBeerKey()] = beer.getBeerFeaturesMatrix()
+            userInputDict = {}
+            for userP in userInput:
+                userInputDict[userP.getBeerKey()] = userP.getBeerFeaturesMatrix()
+            allNNResult = {}
+            
+            print('\nLoading Complete')
+
+
+        elif choice == 2:           
+            
+            kChoice = -1
+            while kChoice < 0 or kChoice > 2:
+                print('\nK Nearest Neighbor Options')
+                print('0. Go back: this will erase all KNN-related data')
+                print('1. Optimize K: function to optimize K')
+                print('2. Classify user input using KNN algorithm and optimized K')
+                print('3. Run All Nearest Neighbors algorithm')
+                print('4. Make Recommendations based on B Nearest Neighbors')
                 try:
-                    clusterChoice = int(input())
+                    kChoice = int(input())
                 except:
                     print('\nInvalid choice, please choose wisely.')
 
-                
+### kChoice == 1: Optimize K
+                if kChoice == 1:
                     
-                if clusterChoice != 0:
-                    clusterChoice = -1
+                    np.set_printoptions(threshold=np.inf, precision = 3)
+                    # Train
+                    # Test
+                # so we are going to divide our data into training and test sets
+                    trainBeerStyleKeys = [0] * 150
+                    trainBeer = []
+                    testBeerStyleKeys = [0] * 150
+                    testBeer = []
+
+                    maxTrainingLabelsCount = 40
+                    maxTestingLabelsCount = 10
+                    
+                    for i in range(0, len(allBeer)):
+                        if trainBeerStyleKeys[(allBeer[i].getBeerCategoryKey() - 1)] < maxTrainingLabelsCount:
+                            trainBeer.append(allBeer[i])
+                            trainBeerStyleKeys[allBeer[i].getBeerCategoryKey() - 1] += 1
+                        elif testBeerStyleKeys[(allBeer[i].getBeerCategoryKey() - 1)] < maxTestingLabelsCount:
+                            testBeer.append(allBeer[i])
+                            testBeerStyleKeys[allBeer[i].getBeerCategoryKey() - 1] += 1
+                            
+                    shuffledTrainBeer = trainBeer            
+                    random.shuffle(shuffledTrainBeer)
+                    shuffledTestBeer = testBeer            
+                    random.shuffle(shuffledTestBeer)
+
+                    # convert all of our beer data from beer objects to a matrix
+        #            beerFeatures_X, beerStyle_y = dataSetup(trainBeer, yAvailable = True)        
+                    trainSetFeatures_X, trainSetStyles_y = dataSetup(trainBeer, yAvailable = True)
+                    testSetFeatures_X, testSetStyle_y = dataSetup(testBeer, yAvailable = True)
+
+                    print('\nOptimizing K')
+                    optimizedK = optimizeKUsingNumpy(trainSetFeatures_X, trainSetStyles_y, maxTrainingLabelsCount)   # this is using list of type [numpy.array(), beerKey], to save time.
+                    print('\nOptimizing Complete!')
+
+                    ### for testing purposes
+#                    optimizedK = [1,2,3,4,5,7,8,9,0,3,5,34,56]
+
+                    print('\nTesting Optimized K')
+                    testOptimizedKUsingNumpy(testSetFeatures_X, testSetStyle_y, optimizedK)
+                    print('\nTesting Complete!')
+
+### kChoice == 2: Classify User Input
+                elif kChoice == 2:
+
+                    # for testing purposes:
+#                    optimizedK = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                    
+                    if len(optimizedK) != 0:
+                        # this is where we convert allBeer into data and userPredict and userCrossValidation into data sets
+                        # we will use allBeer data and optimizedK sets to classify each userPredict and userCrossValidation
+                        # we must then graph the results, red for userPredict classification and black for the other classifications??
+
+                        allBeerFeatures_X, allBeerStyles_y = dataSetup(allBeer, yAvailable = True)
+                        for beer in userInput:
+                            userBeerFeatures_X = dataSetup([beer])
+                            listOfKResults = classifyANewBeerUsingNumpy(allBeerFeatures_X, allBeerStyles_y, userBeerFeatures_X, optimizedK)
+                            print('\nBeer Name:      ' +  beer.getBeerName())
+                            print('Beer Classification based on optimized K values:')
+                            for kResults in listOfKResults:
+                                print('k-value:        ')
+                                print(kResults[0])
+                                print('Style Key:      ')
+                                print(int(kResults[1]))
+                                print('Style Name:     ')
+                                print(categoryDictionary[int(kResults[1])])
+                            print('Based on optimized K values and k Nearest Neighbors, ' + beer.getBeerName() + ' should be classified as:')
+                            print(categoryDictionary[Counter(np.array(listOfKResults)[:,1]).most_common(1)[0][0]])
+#                            print(Counter(np.array(listOfKResults)[:,1]).most_common(1))
+                    else:
+                        print('\nIt might be helpful to run option 1 first..')
+
+                #  Option to run allNNResults for user input and cross validation.
+
+                if kChoice == 3:                    
+                    try:
+                        # calculate all nearest neighbor distances
+                        print('\nRunning all nearest neighbors algorithm on all features..')
+                        allNNResult = calculateAllNN(AllBeerDict, userInputDict)
+#                        print('\nRunning KNN algorithm on all Cross Validation features')
+#                        allNNCrossValidationResult = calculateAllNN(AllBeerDict, userCrossValidationDict)
+                        print('\all nearest neighbors  calculation complete!')
+                    except:
+                        print('You need to load your beer data first!')
+#  Option to print the allNNResults and cross validation results
+                if kChoice == 4:
+                    print('\nHow many B recommendations do you want for each input? ')
+                    try:
+                        b = int(input())
+                    except:
+                        print('\nInvalid choice, please choose wisely.')
+#                    try:
+                    print('\nPrinting B Recommendations:')
+
+                    
+        ### SOMETHING GOING ON HERE!
+                    
+                    printBNearestNeighbors(allNNResult, allBeer, b, userInput)
+                    print('\nRecommendations complete!')
+#                    print('\nPrinting K Nearest Neighbors Cross Validation Results:')
+#                    knnCrossValidationResult = printKNearestNeighbors(allNNCrossValidationResult, allBeer, k, userCrossValidation)
+#                    except:
+#                        print('\nWe need to run KNN algorithm first!')
+
+
+
+
+#  Option to run allNN and cross validation on chosen set of sub features mouthfeel, taste, and flavor
+
+#                if kChoice == 4:
+#                    
+#                    try:
+#                        print('\nRunning KNN algorithm on select set of features..')
+#                        # run KNN on the sub features
+#                        allNNMouthfeelResult = calculateAllNN(mouthfeelBeerDict, mouthfeelUserDict)
+#                        allNNTasteResult = calculateAllNN(tasteBeerDict, tasteUserDict)
+#                        allNNFlavorResult = calculateAllNN(flavorBeerDict, flavorUserDict)
+#                        print('\nRunning KNN algorithm on Cross Validation select set of features')
+#                        # run cross validation KNN on sub features
+#                        allNNMouthfeelCrossValidationResult = calculateAllNN(mouthfeelBeerDict, mouthfeelCrossValidationDict)
+#                        allNNTasteCrossValidationResult = calculateAllNN(tasteBeerDict, tasteCrossValidationDict)
+#                        allNNFlavorCrossValidationResult = calculateAllNN(flavorBeerDict, flavorCrossValidationDict)
+#                        print('\nKNN calculation complete!')
+#                    except:
+#                        print('\nWe need to run KNN algorithm first!')
+
+#        elif choice == 5:
+#            k = -1
+#            while k < 1:
+#                print('\nHow many neighbors are we basing the classification on?')
+#                try:
+#                    k = int(input())
+#                except:
+#                    print('\nInvalid choice, please choose wisely.')
+#            try:
+#                for newBeer in userPredict:
+
+#                    print('\nRunning Classification on ' + newBeer.getBeerName())
+                    # classifyNewBeerUsingBeerObjects(...):  ... return distancesKNN, mostLabelsInDistancesKNN
+#                    bnnResult, knnResultingLabel = classifyNewBeerUsingBeerObjects(allBeer, newBeer, k)
+#            except:
+#                print('Need to load beer information first')
+
+
+
+###*************************************************************************************************************************************************
+# opportunity here to take features reduction into consideration
+# this works, but needs cleaning up.
+                        
+                if kChoice == 5:
+                    print('\nHow many recommendations (K Nearest Neighbors) do you want for each input? ')                    
+                    try:
+                        k = int(input())
+                    except:
+                        print('\nInvalid choice, please choose wisely.')
+                    try:
+                        print('\nPrinting Recommendations on select set of features..')
+                        print('\nBased on Mouthfeel:')
+                        printKNearestNeighborsFromSubFeatures(allNNMouthfeelResult, allBeer, k = k, userInput = userPredict)
+                        print('\nBased on Taste:')
+                        printKNearestNeighborsFromSubFeatures(allNNTasteResult, allBeer, k = k, userInput = userPredict)
+                        print('\nBased on Flavor and Aroma:')
+                        printKNearestNeighborsFromSubFeatures(allNNFlavorResult, allBeer, k = k, userInput = userPredict)
+                        print('************************************************************************')
+                        print('\nPrinting Recommendations Cross Validation on select set of features..')
+                        print('\nBased on Mouthfeel:')
+                        printKNearestNeighborsFromSubFeatures(allNNMouthfeelCrossValidationResult, allBeer, k = k, userInput = userCrossValidation)
+                        print('\nBased on Taste:')
+                        printKNearestNeighborsFromSubFeatures(allNNTasteCrossValidationResult, allBeer, k = k, userInput = userCrossValidation)
+                        print('\nBased on Flavor and Aroma:')
+                        printKNearestNeighborsFromSubFeatures(allNNFlavorCrossValidationResult, allBeer, k = k, userInput = userCrossValidation)
+                        print('\nRecommendations complete!')
+                    except:
+                        print('\nWe need to run KNN algorithm first!')
+
+                if kChoice == 6:
+                    print('\nHow many recommendations do you want? ')                    
+                    try:
+                        k = int(input())
+                    except:
+                        print('\nInvalid choice, please choose wisely.')
+                    try:
+                        print('\nPrinting ')
+                        knnSubFeatures = getKNearestNeighborsAcrossSubFeatures(allNNMouthfeelResult, allNNTasteResult, allNNFlavorResult, allBeer, k = k, userInput = userPredict)
+
+                        printKNearestNeighborsAcrossAllSubFeatures(knnSubFeatures, allBeer, userPredict)
+
+                        print('************************************************************************')
+                        print('\nPrinting Recommendations Cross Validation on select set of features..')
+                        
+                        knnSubFeatures = getKNearestNeighborsAcrossSubFeatures(allNNMouthfeelCrossValidationResult, allNNTasteCrossValidationResult, allNNFlavorCrossValidationResult, allBeer, k = k, userInput = userCrossValidation)
+
+                        printKNearestNeighborsAcrossAllSubFeatures(knnSubFeatures, allBeer, userPredict)
+                    except:
+                        print('\nOops, something went wrong!')
+
+
+                        
+                elif choice == 6:
+                # 0 Astringency
+                # 1 Body
+                # 2 Alcohol
+                # 3 Bitter
+                # 4 Sweet
+                # 5 Sour
+                # 6 Salty
+                # 7 Fruits
+                # 8 Hoppy
+                # 9 Spices
+                # 10 Malty
+
+                    # dictionaries that will hold beer keys as key and features matrix as values from the saved files of collected information
+                    AllBeerDict = {}
+                    mouthfeelBeerDict = {}
+                    tasteBeerDict = {}
+                    flavorBeerDict = {}
+                    for beer in allBeer:
+                        AllBeerDict[beer.getBeerKey()] = beer.getBeerFeaturesMatrix()
+                        mouthfeelBeerDict[beer.getBeerKey()] = [beer.getBeerFeaturesMatrix()[0], beer.getBeerFeaturesMatrix()[1], beer.getBeerFeaturesMatrix()[2]]
+                        tasteBeerDict[beer.getBeerKey()] = [beer.getBeerFeaturesMatrix()[3], beer.getBeerFeaturesMatrix()[4], beer.getBeerFeaturesMatrix()[5], beer.getBeerFeaturesMatrix()[6]]
+                        flavorBeerDict[beer.getBeerKey()] = [beer.getBeerFeaturesMatrix()[7], beer.getBeerFeaturesMatrix()[8], beer.getBeerFeaturesMatrix()[9], beer.getBeerFeaturesMatrix()[10]]
+                           
+                        
+                    userInputDict = {}
+                    mouthfeelUserDict = {}
+                    tasteUserDict = {}
+                    flavorUserDict = {}
+                    for userP in userInputDict:
+                        userPredictDict[userP.getBeerKey()] = userP.getBeerFeaturesMatrix()
+                        mouthfeelUserDict[userP.getBeerKey()] = [userP.getBeerFeaturesMatrix()[0], userP.getBeerFeaturesMatrix()[1], userP.getBeerFeaturesMatrix()[2]]
+                        tasteUserDict[userP.getBeerKey()] = [userP.getBeerFeaturesMatrix()[3], userP.getBeerFeaturesMatrix()[4], userP.getBeerFeaturesMatrix()[5], userP.getBeerFeaturesMatrix()[6]]
+                        flavorUserDict[userP.getBeerKey()] = [userP.getBeerFeaturesMatrix()[7], userP.getBeerFeaturesMatrix()[8], userP.getBeerFeaturesMatrix()[9], userP.getBeerFeaturesMatrix()[10]]
+
+                    print(userPredictDict)
+
+                    userCrossValidationDict = {}
+                    mouthfeelCrossValidationDict = {}
+                    tasteCrossValidationDict = {}
+                    flavorCrossValidationDict = {}
+                    for userCV in userCrossValidation:
+                        userCrossValidationDict[userCV.getBeerKey()] = userCV.getBeerFeaturesMatrix()
+                        mouthfeelCrossValidationDict[userCV.getBeerKey()] = [userCV.getBeerFeaturesMatrix()[0], userCV.getBeerFeaturesMatrix()[1], userCV.getBeerFeaturesMatrix()[2]]
+                        tasteCrossValidationDict[userCV.getBeerKey()] = [userCV.getBeerFeaturesMatrix()[3], userCV.getBeerFeaturesMatrix()[4], userCV.getBeerFeaturesMatrix()[5], userCV.getBeerFeaturesMatrix()[6]]
+                        flavorCrossValidationDict[userCV.getBeerKey()] = [userCV.getBeerFeaturesMatrix()[7], userCV.getBeerFeaturesMatrix()[8], userCV.getBeerFeaturesMatrix()[9], userCV.getBeerFeaturesMatrix()[10]]
+           
+
+                    # dictionaries that will hold the sorted results from AllNN algorithms
+                    allNNResult = {}
+                    allNNCrossValidationResult = {}
+                    allNNMouthfeelResult = {}
+                    allNNTasteResult = {}
+                    allNNFlavorResult = {}
+                    allNNMouthfeelCrossValidationResult = {}
+                    allNNTasteCrossValidationResult = {}
+                    allNNFlavorCrossValidationResult = {}
+                    
+                    # dictionaries that will hold the sorted results from KNN algorithms
+                    bnnResult = {}
+                    knnCrossValidationResult = {}
+                    knnMouthfeelResult = {}
+                    knnTasteResult = {}
+                    knnFlavorResult = {}
+                    knnMouthfeelCrossValidationResult = {}
+                    knnTasteCrossValidationResult = {}
+                    knnFlavorCrossValidationResult = {}
+                    knnSubFeatures = {}
+                    
+                if kChoice != 0:
+                    kChoice = -1
                 else:
                     break
-                
                 
         if choice != 0:
             choice = -1  
         else:
             break
 
-    
+#***********************************************************************************************************************************
+# menu options.
 
-#*******************************************************************************************************
-# main function    
 def main():
-    mainMenuOptions()
+
+    choice = -1
+    while choice < 0 or choice > 2:
+        print('\nBeer Recommender Project')
+        print('What operation are we running?')
+        print('0. QUIT')
+        print('1. Data Collection: web scraping, saving, and loading all beer data')
+        print('2. Data Options: graphing and using ML techniques on beer data')
+
+### Need a word counter put together with a means to save the word counter
+### Need a key re-assignment for all beer, because we had to scrape data in multiple sessions there are multiple keys being reused.
+# need a try except here.
+        try:
+            choice = int(input())
+        except:
+            print('\nInvalid choice, please choose wisely.')
+        if(choice == 1):
+            treeMenuOptions()
+        elif(choice == 2):
+            dataMenuOptions()
+
+        if choice != 0:
+            choice = -1
+        else:
+            break    
+
 main()
