@@ -3,7 +3,6 @@ from collections import Counter
 from math import pi
 from openpyxl import Workbook
 from openpyxl import load_workbook
-from pprint import pprint
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
@@ -14,7 +13,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import pandas as pd
 import random
 import re
 import time
@@ -1544,87 +1542,6 @@ def calculateAllNN(data, predict):
         results.update({ukey: ukeyValues})
     return results
 
-#**********************************************************************************************************************************
-# Function to find the common k number of beers to be recommended based on euclidean distance of three sub features calculated separately.
-
-def getKNearestNeighborsAcrossSubFeatures(mouth, taste, flavor, aBeer, k, userInput):
-
-    # Note: because the dictionaries of user input beer in mouth, taste, and flavor are already sorted by distance
-    # we only need to create an array of the beer key values.
-    # dict will have { uPred : { id : [mouthfeelDist, tasteDist, flavorDist]} }
-
-    kDict = {}
-    for uPred in userInput:
-        # unpack beer keys from each sub feature data set.
-        currentKeyInMouthData = []
-        # first we unpack the sub features dictionaries.
-        for key, values in mouth.items():
-            if key == uPred.getBeerKey():
-                for bKey, bVal in values.items():
-                    currentKeyInMouthData.append([bKey, bVal])
-
-        currentKeyInTasteData = []
-        # first we unpack the sub features dictionaries.
-        for key, values in taste.items():
-            if key == uPred.getBeerKey():
-                for bKey, bVal in values.items():
-                    currentKeyInTasteData.append([bKey, bVal])
-
-        currentKeyInFlavorData = []
-        # first we unpack the sub features dictionaries.
-        for key, values in flavor.items():
-            if key == uPred.getBeerKey():
-                for bKey, bVal in values.items():
-                    currentKeyInFlavorData.append([bKey, bVal])
-
-
-        # here we are getting the first k-modes across all features.
-        kIDs = []
-        currentIndex = 0
-        matrix = np.array([currentKeyInMouthData[currentIndex][0], currentKeyInTasteData[currentIndex][0], currentKeyInFlavorData[currentIndex][0]])
-
-        atK = False
-        while atK == False:
-            currentIndex += 1
-            # we are now looking for k number of nearest neighbors.
-            # we add a row of beer id's each time we do not have k common neighbors across the three columns in the matrix
-            # and repeat until we have k common beer across each column in the matrix.
-            # once we find k nearest neighbors, we break out of the loop and return the results.
-
-            # returning the first k set of ID's that reaches k.
-            u, c = np.unique(matrix, return_counts=True)
-            kIDs = u[c == 3]
-            if len(kIDs) >= k:
-                atK = True
-                break
-            else:
-                # if we do not have k common beer ids to return, add the next row from each feature column
-                newRow = np.array([currentKeyInMouthData[currentIndex][0], currentKeyInTasteData[currentIndex][0], currentKeyInFlavorData[currentIndex][0]])
-                matrix = np.vstack([matrix, newRow])
-
-        # here we print k result.
-        uPredData = {}
-        for index in kIDs:
-
-            allData = []
-            for m in currentKeyInMouthData:
-                if m[0] == index:
-                    allData.append(m[1])
-                    break
-            for t in currentKeyInTasteData:
-                if t[0] == index:
-                    allData.append(t[1])
-                    break
-            for f in currentKeyInFlavorData:
-                if f[0] == index:
-                    allData.append(f[1])
-                    break
-                
-            uPredData.update({index: allData})
-            
-        kDict.update({uPred.getBeerKey(): uPredData})
-    return kDict        
-
 
 #**********************************************************************************************************************************
 # functions to print recommendations based on each  userPredict beer.
@@ -1664,68 +1581,8 @@ def printBNearestNeighbors(data, aBeer, k, userInput):
 #   knn = {'user Input Beer 1 Name': { 'user Input Beer 1 Name': [user input features]}, {'Recommendation 1': [recommendation 1 features]}, ..., {'Recommendation N': [recommendation N features]}}
 #    return knn
 
-
-#**********************************************************************************************************************************
-# functions to print recommendations based on each  userPredict beer.
-
-def printKNearestNeighborsFromSubFeatures(data, aBeer, k, userInput):
-
-    for dKey, dVal in data.items():
-        currentUserInputBeer = BeerClass.Beer()
-        for userIn in userInput:
-            if userIn.getBeerKey() == dKey:
-                currentUserInputBeer = userIn
-                break
-        print('*************************************************************')
-        print('\nRecommendations based on ' + currentUserInputBeer.getBeerName())
-        print('Style:        ' + currentUserInputBeer.getBeerStyle())
-        print(currentUserInputBeer.getBeerFeaturesMatrix())
-        counter = 0
-        atK = False
-        for bkey, bvalues in dVal.items():
-            for beer in aBeer:
-                if bkey == beer.getBeerKey():
-                    print('\nName:         ' + str(beer.getBeerName()))
-                    print('Style:        ' + str(beer.getBeerStyle()))
-                    print('Feature Dist: ' + str(bvalues))
-                    print('Actual Dist:  ' + str(calculateEuclideanDistance(beer.getBeerFeaturesMatrix(), currentUserInputBeer.getBeerFeaturesMatrix())))
-                    print(beer.getBeerFeaturesMatrix())
-                    counter += 1
-                    if counter == k:
-                        atK = True
-                    break
-            if atK == True:
-                break
-
-# function for printing k neighbors across sub features
-# here we do not need to indicate k as it is already taken into account finding the recommendations in:
-# getKNearestNeighborsAcrossSubFeatures(mouth, taste, flavor, aBeer, k, userInput)
-def printKNearestNeighborsAcrossAllSubFeatures(data, aBeer, userInput):
-
-    for dKey, dvalues in data.items():
-        currentUserInputBeer = BeerClass.Beer()
-        for userIn in userInput:
-            if userIn.getBeerKey() == dKey:
-                currentUserInputBeer = userIn
-                break
-        print('*************************************************************')
-        print('\nRecommendations based on ' + currentUserInputBeer.getBeerName())
-        print('Style:               ' + currentUserInputBeer.getBeerStyle())
-        print(currentUserInputBeer.getBeerFeaturesMatrix())
-        for bKey, bVal in dvalues.items():
-            for beer in aBeer:
-                if bKey == beer.getBeerKey():
-                    print('\nName:                  ' + str(beer.getBeerName()))
-                    print('Style:                 ' + str(beer.getBeerStyle()))
-                    print('Dist Mouthfeel:        ' + str(bVal[0]))
-                    print('Dist Taste:            ' + str(bVal[1]))
-                    print('Dist Flavor and Aroma: ' + str(bVal[2]))
-                    print('Actual Dist:           ' + str(calculateEuclideanDistance(beer.getBeerFeaturesMatrix(), currentUserInputBeer.getBeerFeaturesMatrix())))
-                    print(beer.getBeerFeaturesMatrix())
-                    break
-            
 #******************************************************************************************************************
-# Graphing functions
+# Graphing the user input features and the b nearest neighbors recommended.
 
 
 def graphRecommendations(data):
@@ -1943,17 +1800,62 @@ def testOptimizedKUsingNumpy(data, style, K):
 #**************************************************************************************************
 # Function to classify a new beer based on optimized K nearest neigbors.
 
-def classifyANewBeerUsingNumpy(aBeerFeatures, aBeerStyles, uBeerFeatures, K):
+def classifyANewBeerUsingNumpy(aBeerFeatures, aBeerStyles, uBeerFeatures, K, name, classDictionary):
     
     allSortedDistances = getSortedDistancesUsingNumpy(aBeerFeatures, uBeerFeatures, aBeerStyles)
     accuracyIndexer = -1
     mostCommonStylesAtK = []
+    graphingData = {} 
     for k in K:
         distancesKNN = allSortedDistances[:k]
         labelsKNN = np.array(distancesKNN) 
         mostLabelsInDistancesKNN = Counter(labelsKNN[:,1]).most_common(1)
-        mostCommonStylesAtK.append([k, mostLabelsInDistancesKNN[0][0]])
+        mostCommonStylesAtK.append([k, mostLabelsInDistancesKNN[0][0], distancesKNN])
+        dist = []
+        style = []
+        for i in distancesKNN:
+            dist.append(i[0])
+            style.append(i[1])
+        graphingData.update({k: [dist, style]})
+    graphClassifications(graphingData, name, classDictionary)
     return mostCommonStylesAtK
+
+#*****************************************************************************************************************
+# function that graphs the features of a new beer and the features using colors to represent classifications of the k nearest neighbors. 
+
+def graphClassifications(data, title, classDictionary):
+    
+    color = ['red', 'green', 'blue', 'yellow', 'cyan', 'magenta', 'brown', 'coral', 'darkgreen', 'gold', 'fuchsia', 'lightblue', 'maroon', 'teal', 'violet']
+    # here we unpack our data.
+    x_kValues = []
+    y_distances = []
+    z_classifications = []
+    z_classificationsColor = {}
+    for k, dist_style in data.items():
+        x_kValues.append(k)
+        y_distances = [d for d in dist_style[0]]
+        z_classifications = [c for c in dist_style[1]]
+
+    
+    uniqueClassifications = list(set(z_classifications))
+    colorIndex = 0
+    for i in uniqueClassifications:
+        z_classificationsColor.update({i: [color[colorIndex], classDictionary[i]]})
+        colorIndex += 1
+
+    fig, ax = plt.subplots()
+    for x in range(0, len(x_kValues)):
+        classificationIndex = int(z_classifications[x])
+        label = z_classificationsColor[classificationIndex][1]
+        classColor = z_classificationsColor[classificationIndex][0]
+        ax.scatter(x_kValues[x], y_distances[x], s = 20, label = label, color = classColor)
+        plt.plot([x + 1, x_kValues[x]], [0, y_distances[x]], color = classColor)
+
+    plt.title(title)
+    legend = ax.legend(bbox_to_anchor=(1.05, 1), loc = 'upper left')
+    ax.set(xlabel = 'k values', ylabel = 'distance')
+    fig.savefig('Classification of ' + title + '.png')
+    plt.show()
     
 #******************************************************************************************************************
 # Main Menu Functions
@@ -2187,20 +2089,19 @@ def dataMenuOptions():
 
                         allBeerFeatures_X, allBeerStyles_y = dataSetup(allBeer, yAvailable = True)
                         for beer in userInput:
+                            recommendationResultToGraph = {}
                             userBeerFeatures_X = dataSetup([beer])
-                            listOfKResults = classifyANewBeerUsingNumpy(allBeerFeatures_X, allBeerStyles_y, userBeerFeatures_X, optimizedK)
+                            listOfKResults = classifyANewBeerUsingNumpy(allBeerFeatures_X, allBeerStyles_y, userBeerFeatures_X, optimizedK, beer.getBeerName(), categoryDictionary)
                             print('\nBeer Name:      ' +  beer.getBeerName())
-                            print('Beer Classification based on optimized K values:')
+                            print('Beer Classifications based on optimized K values:')
                             for kResults in listOfKResults:
-                                print('k-value:        ')
+                                print('\nK-value:        ')
                                 print(kResults[0])
-                                print('Style Key:      ')
-                                print(int(kResults[1]))
                                 print('Style Name:     ')
                                 print(categoryDictionary[int(kResults[1])])
-                            print('Based on optimized K values and k Nearest Neighbors, ' + beer.getBeerName() + ' should be classified as:')
-                            print(categoryDictionary[Counter(np.array(listOfKResults)[:,1]).most_common(1)[0][0]])
-#                            print(Counter(np.array(listOfKResults)[:,1]).most_common(1))
+
+
+                            # here we package up the data to have it graphed.
                     else:
                         print('\nIt might be helpful to run option 1 first..')
 
@@ -2213,7 +2114,7 @@ def dataMenuOptions():
                         allNNResult = calculateAllNN(AllBeerDict, userInputDict)
 #                        print('\nRunning KNN algorithm on all Cross Validation features')
 #                        allNNCrossValidationResult = calculateAllNN(AllBeerDict, userCrossValidationDict)
-                        print('\all nearest neighbors  calculation complete!')
+                        print('\nAll nearest neighbors  calculation complete!')
                     except:
                         print('You need to load your beer data first!')
 #  Option to print the allNNResults and cross validation results
@@ -2236,169 +2137,7 @@ def dataMenuOptions():
 #                    except:
 #                        print('\nWe need to run KNN algorithm first!')
 
-
-
-
-#  Option to run allNN and cross validation on chosen set of sub features mouthfeel, taste, and flavor
-
-#                if kChoice == 4:
 #                    
-#                    try:
-#                        print('\nRunning KNN algorithm on select set of features..')
-#                        # run KNN on the sub features
-#                        allNNMouthfeelResult = calculateAllNN(mouthfeelBeerDict, mouthfeelUserDict)
-#                        allNNTasteResult = calculateAllNN(tasteBeerDict, tasteUserDict)
-#                        allNNFlavorResult = calculateAllNN(flavorBeerDict, flavorUserDict)
-#                        print('\nRunning KNN algorithm on Cross Validation select set of features')
-#                        # run cross validation KNN on sub features
-#                        allNNMouthfeelCrossValidationResult = calculateAllNN(mouthfeelBeerDict, mouthfeelCrossValidationDict)
-#                        allNNTasteCrossValidationResult = calculateAllNN(tasteBeerDict, tasteCrossValidationDict)
-#                        allNNFlavorCrossValidationResult = calculateAllNN(flavorBeerDict, flavorCrossValidationDict)
-#                        print('\nKNN calculation complete!')
-#                    except:
-#                        print('\nWe need to run KNN algorithm first!')
-
-#        elif choice == 5:
-#            k = -1
-#            while k < 1:
-#                print('\nHow many neighbors are we basing the classification on?')
-#                try:
-#                    k = int(input())
-#                except:
-#                    print('\nInvalid choice, please choose wisely.')
-#            try:
-#                for newBeer in userPredict:
-
-#                    print('\nRunning Classification on ' + newBeer.getBeerName())
-                    # classifyNewBeerUsingBeerObjects(...):  ... return distancesKNN, mostLabelsInDistancesKNN
-#                    bnnResult, knnResultingLabel = classifyNewBeerUsingBeerObjects(allBeer, newBeer, k)
-#            except:
-#                print('Need to load beer information first')
-
-
-
-###*************************************************************************************************************************************************
-# opportunity here to take features reduction into consideration
-# this works, but needs cleaning up.
-                        
-                if kChoice == 5:
-                    print('\nHow many recommendations (K Nearest Neighbors) do you want for each input? ')                    
-                    try:
-                        k = int(input())
-                    except:
-                        print('\nInvalid choice, please choose wisely.')
-                    try:
-                        print('\nPrinting Recommendations on select set of features..')
-                        print('\nBased on Mouthfeel:')
-                        printKNearestNeighborsFromSubFeatures(allNNMouthfeelResult, allBeer, k = k, userInput = userPredict)
-                        print('\nBased on Taste:')
-                        printKNearestNeighborsFromSubFeatures(allNNTasteResult, allBeer, k = k, userInput = userPredict)
-                        print('\nBased on Flavor and Aroma:')
-                        printKNearestNeighborsFromSubFeatures(allNNFlavorResult, allBeer, k = k, userInput = userPredict)
-                        print('************************************************************************')
-                        print('\nPrinting Recommendations Cross Validation on select set of features..')
-                        print('\nBased on Mouthfeel:')
-                        printKNearestNeighborsFromSubFeatures(allNNMouthfeelCrossValidationResult, allBeer, k = k, userInput = userCrossValidation)
-                        print('\nBased on Taste:')
-                        printKNearestNeighborsFromSubFeatures(allNNTasteCrossValidationResult, allBeer, k = k, userInput = userCrossValidation)
-                        print('\nBased on Flavor and Aroma:')
-                        printKNearestNeighborsFromSubFeatures(allNNFlavorCrossValidationResult, allBeer, k = k, userInput = userCrossValidation)
-                        print('\nRecommendations complete!')
-                    except:
-                        print('\nWe need to run KNN algorithm first!')
-
-                if kChoice == 6:
-                    print('\nHow many recommendations do you want? ')                    
-                    try:
-                        k = int(input())
-                    except:
-                        print('\nInvalid choice, please choose wisely.')
-                    try:
-                        print('\nPrinting ')
-                        knnSubFeatures = getKNearestNeighborsAcrossSubFeatures(allNNMouthfeelResult, allNNTasteResult, allNNFlavorResult, allBeer, k = k, userInput = userPredict)
-
-                        printKNearestNeighborsAcrossAllSubFeatures(knnSubFeatures, allBeer, userPredict)
-
-                        print('************************************************************************')
-                        print('\nPrinting Recommendations Cross Validation on select set of features..')
-                        
-                        knnSubFeatures = getKNearestNeighborsAcrossSubFeatures(allNNMouthfeelCrossValidationResult, allNNTasteCrossValidationResult, allNNFlavorCrossValidationResult, allBeer, k = k, userInput = userCrossValidation)
-
-                        printKNearestNeighborsAcrossAllSubFeatures(knnSubFeatures, allBeer, userPredict)
-                    except:
-                        print('\nOops, something went wrong!')
-
-
-                        
-                elif choice == 6:
-                # 0 Astringency
-                # 1 Body
-                # 2 Alcohol
-                # 3 Bitter
-                # 4 Sweet
-                # 5 Sour
-                # 6 Salty
-                # 7 Fruits
-                # 8 Hoppy
-                # 9 Spices
-                # 10 Malty
-
-                    # dictionaries that will hold beer keys as key and features matrix as values from the saved files of collected information
-                    AllBeerDict = {}
-                    mouthfeelBeerDict = {}
-                    tasteBeerDict = {}
-                    flavorBeerDict = {}
-                    for beer in allBeer:
-                        AllBeerDict[beer.getBeerKey()] = beer.getBeerFeaturesMatrix()
-                        mouthfeelBeerDict[beer.getBeerKey()] = [beer.getBeerFeaturesMatrix()[0], beer.getBeerFeaturesMatrix()[1], beer.getBeerFeaturesMatrix()[2]]
-                        tasteBeerDict[beer.getBeerKey()] = [beer.getBeerFeaturesMatrix()[3], beer.getBeerFeaturesMatrix()[4], beer.getBeerFeaturesMatrix()[5], beer.getBeerFeaturesMatrix()[6]]
-                        flavorBeerDict[beer.getBeerKey()] = [beer.getBeerFeaturesMatrix()[7], beer.getBeerFeaturesMatrix()[8], beer.getBeerFeaturesMatrix()[9], beer.getBeerFeaturesMatrix()[10]]
-                           
-                        
-                    userInputDict = {}
-                    mouthfeelUserDict = {}
-                    tasteUserDict = {}
-                    flavorUserDict = {}
-                    for userP in userInputDict:
-                        userPredictDict[userP.getBeerKey()] = userP.getBeerFeaturesMatrix()
-                        mouthfeelUserDict[userP.getBeerKey()] = [userP.getBeerFeaturesMatrix()[0], userP.getBeerFeaturesMatrix()[1], userP.getBeerFeaturesMatrix()[2]]
-                        tasteUserDict[userP.getBeerKey()] = [userP.getBeerFeaturesMatrix()[3], userP.getBeerFeaturesMatrix()[4], userP.getBeerFeaturesMatrix()[5], userP.getBeerFeaturesMatrix()[6]]
-                        flavorUserDict[userP.getBeerKey()] = [userP.getBeerFeaturesMatrix()[7], userP.getBeerFeaturesMatrix()[8], userP.getBeerFeaturesMatrix()[9], userP.getBeerFeaturesMatrix()[10]]
-
-                    print(userPredictDict)
-
-                    userCrossValidationDict = {}
-                    mouthfeelCrossValidationDict = {}
-                    tasteCrossValidationDict = {}
-                    flavorCrossValidationDict = {}
-                    for userCV in userCrossValidation:
-                        userCrossValidationDict[userCV.getBeerKey()] = userCV.getBeerFeaturesMatrix()
-                        mouthfeelCrossValidationDict[userCV.getBeerKey()] = [userCV.getBeerFeaturesMatrix()[0], userCV.getBeerFeaturesMatrix()[1], userCV.getBeerFeaturesMatrix()[2]]
-                        tasteCrossValidationDict[userCV.getBeerKey()] = [userCV.getBeerFeaturesMatrix()[3], userCV.getBeerFeaturesMatrix()[4], userCV.getBeerFeaturesMatrix()[5], userCV.getBeerFeaturesMatrix()[6]]
-                        flavorCrossValidationDict[userCV.getBeerKey()] = [userCV.getBeerFeaturesMatrix()[7], userCV.getBeerFeaturesMatrix()[8], userCV.getBeerFeaturesMatrix()[9], userCV.getBeerFeaturesMatrix()[10]]
-           
-
-                    # dictionaries that will hold the sorted results from AllNN algorithms
-                    allNNResult = {}
-                    allNNCrossValidationResult = {}
-                    allNNMouthfeelResult = {}
-                    allNNTasteResult = {}
-                    allNNFlavorResult = {}
-                    allNNMouthfeelCrossValidationResult = {}
-                    allNNTasteCrossValidationResult = {}
-                    allNNFlavorCrossValidationResult = {}
-                    
-                    # dictionaries that will hold the sorted results from KNN algorithms
-                    bnnResult = {}
-                    knnCrossValidationResult = {}
-                    knnMouthfeelResult = {}
-                    knnTasteResult = {}
-                    knnFlavorResult = {}
-                    knnMouthfeelCrossValidationResult = {}
-                    knnTasteCrossValidationResult = {}
-                    knnFlavorCrossValidationResult = {}
-                    knnSubFeatures = {}
-                    
                 if kChoice != 0:
                     kChoice = -1
                 else:
