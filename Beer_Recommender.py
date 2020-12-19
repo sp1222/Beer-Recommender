@@ -34,6 +34,9 @@ MAX_NUMBER_OF_FEATURES = 11
 BEER_ALL_INFO = 'Beer_All_Info\\'
 NEW_BEER_ALL_INFO = 'New_Beer_All_Info\\'
 FILE_DIRECTORY = 'D:\\Python Projects\\Beer Recommender Project\\'
+OMITTED_WORDS = 'omitted words.txt'
+KEYWORD_BANK = 'Keyword Bank\\'
+SCRAPE = 'Scrape\\'
 
 # funtion where selenium gathers html from each web page
 def seleniumGetsHTML(site):
@@ -237,61 +240,12 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
         currentRow += 1
         i += 1
         
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Dark Fruits'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
-        
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Citrus Fruits'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
-        
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Tropical Fruits'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
-        
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Vegetable'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
-        
         var = sheet.cell(row = currentRow, column = 1)
         var.value = 'Hoppy'
         var = sheet.cell(row = currentRow, column = 2)
         var.value = feature[i]
         currentRow += 1
         i += 1
-        
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Herbal'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
-        
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Floral'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
-        
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Smoke and Heat'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
         
         var = sheet.cell(row = currentRow, column = 1)
         var.value = 'Spices'
@@ -306,18 +260,6 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
         var.value = feature[i]
         currentRow += 1
         i += 1
-        
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Richness'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
-#        currentRow += 1
-#        i += 1
-        
-#        var = sheet.cell(row = currentRow, column = 1)
-#        var.value = 'Yeast'
-#        var = sheet.cell(row = currentRow, column = 2)
-#        var.value = feature[i]
 
     # save a list of beer and their review count,
     # will use this to determine how impacting the reviews will be on features
@@ -475,61 +417,12 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
             currentRow += 1
             i += 1
             
-#            var = sheet.cell(row = currentRow, column = 1)
-#            var.value = 'Dark Fruits'
-#            var = sheet.cell(row = currentRow, column = 2)
-#            var.value = feature[i]
-#            currentRow += 1
-#            i += 1
-            
-#            var = sheet.cell(row = currentRow, column = 1)
-#            var.value = 'Citrus Fruits'
-#            var = sheet.cell(row = currentRow, column = 2)
-#            var.value = feature[i]
-#            currentRow += 1
-#            i += 1
-            
-#            var = sheet.cell(row = currentRow, column = 1)
-#            var.value = 'Tropical Fruits'
-#            var = sheet.cell(row = currentRow, column = 2)
-#            var.value = feature[i]
-#            currentRow += 1
-#            i += 1
-            
-#            var = sheet.cell(row = currentRow, column = 1)
-#            var.value = 'Vegetable'
-#            var = sheet.cell(row = currentRow, column = 2)
-#            var.value = feature[i]
-#            currentRow += 1
-#            i += 1
-            
             var = sheet.cell(row = currentRow, column = 1)
             var.value = 'Hoppy'
             var = sheet.cell(row = currentRow, column = 2)
             var.value = feature[i]
             currentRow += 1
             i += 1
-            
-#            var = sheet.cell(row = currentRow, column = 1)
-#            var.value = 'Herbal'
-#            var = sheet.cell(row = currentRow, column = 2)
-#            var.value = feature[i]
-#            currentRow += 1
-#            i += 1
-            
-#            var = sheet.cell(row = currentRow, column = 1)
-#            var.value = 'Floral'
-#            var = sheet.cell(row = currentRow, column = 2)
-#            var.value = feature[i]
-#            currentRow += 1
-#            i += 1
-            
-#            var = sheet.cell(row = currentRow, column = 1)
-#            var.value = 'Smoke and heat'
-#            var = sheet.cell(row = currentRow, column = 2)
-#            var.value = feature[i]
-#            currentRow += 1
-#            i += 1
             
             var = sheet.cell(row = currentRow, column = 1)
             var.value = 'Spices'
@@ -544,20 +437,6 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
             var.value = feature[i]
             currentRow += 1
             i += 1
-            
-#            var = sheet.cell(row = currentRow, column = 1)
-#            var.value = 'Richness'
-#            var = sheet.cell(row = currentRow, column = 2)
-#            var.value = feature[i]
-#            currentRow += 1
-#            i += 1
-            
-#            var = sheet.cell(row = currentRow, column = 1)
-#            var.value = 'Yeast'
-#            var = sheet.cell(row = currentRow, column = 2)
-#            var.value = feature[i]
-
-
 ### BEER WORD COUNTS START HERE
         # word count for each beer from description and reviews saved here
         currentRow = BEER_WORD_COUNT_START_ROW
@@ -644,14 +523,7 @@ def gatherInformation(index, wb, tempCategory):
     # this is where we will load our keyword data bank for this beer
     currentRow = 15
     i = 0
-    features = []
-#    while i < 18:
-#        var = sheet.cell(row = currentRow, column = 2)
-#        if var.value != '' or var.value != None:
-#            features.append(sheet.cell(row = currentRow, column = 2).value)
-#        currentRow += 1
-#        i += 1
-#    tempCategory.setCategoryFeaturesMatrix(features)    
+    features = [] 
     index += 1
     
     while index < len(wb.worksheets):
@@ -941,7 +813,7 @@ def openSubCategoryPages(currentCategory, dr, site, key):
     wb = Workbook()
     addStyleToNewWorkbook(wb, currentCategory, currentCategory.getCategoryName(), currentCategory.getCategoryKey(), index = 0)
     name = re.sub('\/', 'and',currentCategory.getCategoryName())
-    file = 'Scrape\\'
+    file = SCRAPE
     openFile = file + name + '.xlsx'
     wb.save(openFile)
 
@@ -966,7 +838,7 @@ def reassignKeys(root):
 def compileWordCounts(root):
 
     invalidWords = []
-    file = open('omitted words.txt', 'r')
+    file = open(KEYWORD_BANK + OMITTED_WORDS, 'r')
     for word in file:
         word = re.sub('\n', '', word)
         invalidWords.append(word)
@@ -1075,7 +947,7 @@ def combineWordCounts(root):
     combineWordCount = sorted(combineWordCount.items(), key=lambda x: x[1], reverse=True)    
     wb = Workbook()
     categoryName = 'Combine Word Count'
-    fileName = 'Keyword Bank\\'
+    fileName = KEYWORD_BANK
     openFile = fileName + categoryName + '.xlsx'
     wb.active = 0
     sheet = wb.active
@@ -1101,7 +973,7 @@ def compileFeaturesDefinitions():
 
     features = {}    # an array of 19 features, dictionary of word with a magnitude of impact
     
-    fileName = 'Keyword Bank\\'
+    fileName = KEYWORD_BANK
     file = 'Beer Descriptors Simplified.xlsx'
     wb = load_workbook(fileName + file)
 
@@ -1261,11 +1133,11 @@ def gatherUserInputInformation():
         # for finding notes
         notes = thisBeerHTML.find('div', {'style': 'clear:both; margin:0; padding:0px 20px; font-size:1.05em;'})
         thisBeer.setBeerDescription(notes.get_text())
-#        try:
-#            thisBeer.setBeerMinIBU(float(minIBU))
-#            thisBeer.setBeerMaxIBU(float(maxIBU))
-#        except:
-#            thisBeer.setBeerManualEditFlag(True)
+        try:
+            thisBeer.setBeerMinIBU(float(minIBU))
+            thisBeer.setBeerMaxIBU(float(maxIBU))
+        except:
+            thisBeer.setBeerManualEditFlag(True)
         # for finding all beer reviews
         beerReviews = thisBeerHTML.findAll('div', {'id': 'rating_fullview_content_2'})
         for each in beerReviews:
@@ -1275,7 +1147,7 @@ def gatherUserInputInformation():
 
         
     invalidWords = []
-    file = open('omitted words.txt', 'r')
+    file = open(KEYWORD_BANK + OMITTED_WORDS, 'r')
     for word in file:
         word = re.sub('\n', '', word)
         invalidWords.append(word)
@@ -1343,7 +1215,7 @@ def gatherUserInputInformation():
     beerFeatures = compileFeaturesDefinitions()
     
     for beer in userCategory.getCategoryBeers():   
-        matrixOfBeerFeatures = []           # n x 1 matrix
+        matrixOfBeerFeatures = []           # n x 1
         for feature, impact in beerFeatures.items():
             magnitudeOfCurrentFeature = 0
             for word in beer.getBeerWordCount():
@@ -1356,7 +1228,7 @@ def gatherUserInputInformation():
     wb = Workbook()
     addStyleToNewWorkbook(wb, userCategory, userCategory.getCategoryName(), userCategory.getCategoryKey(), index = 0)
     name = re.sub('\/', 'and',userCategory.getCategoryName())
-    file = 'Scrape\\'
+    file = SCRAPE
     openFile = file + name + '.xlsx'
     wb.save(openFile)
 
@@ -1521,16 +1393,24 @@ def calculateEuclideanDistance(data, predict):
 #*****************************************************************************************************************************
 # calculates all neighbors from data in dictionaries
 
-def calculateAllNN(data, predict):
+def calculateAllNN(aBeer, uInput):
+    
+    results = {}    # dictionary of dictionaries to be returned, set up as each user beer key as the key,
+                    # and the value being a dictionary of each beer in all beer with the all beer key as the key and the all beer distance as the value
+                    # sorted by distances in ascending order
 
-    results = {}
+    # {
+    #  userInputKey1: {{allBeerKey1: distance1}, {allBeerKey2, distance2}}
+    #  userInputKey2: {{allBeerKey1: distance1}, {allBeerKey2, distance2}}
+    #     ....
+    # }
 
     # iterate through each user input of enjoyed beers
-    for ukey, uval in predict.items():
+    for ukey, uval in uInput.items():
         distances = []
 
         # for each of the 5600 beers in our data, determine the distance between the current user input
-        for bkey, bval in data.items():
+        for bkey, bval in aBeer.items():
             distances.append([calculateEuclideanDistance(bval, uval), bkey, bval])
             
         # sort by shortest distance to the current user input
@@ -1549,7 +1429,7 @@ def calculateAllNN(data, predict):
 def printBNearestNeighbors(data, aBeer, k, userInput):
 
     for dKey, dVal in data.items():
-        knn = {}
+        knn = {}    # a dictionary of dictionaries, with the user input being the first entry of knn dictionary.
         currentUserInputBeer = BeerClass.Beer()
         for userIn in userInput:
             if userIn.getBeerKey() == dKey:
@@ -1578,7 +1458,6 @@ def printBNearestNeighbors(data, aBeer, k, userInput):
             if atK == True:
                 break
         graphRecommendations(knn)
-#   knn = {'user Input Beer 1 Name': { 'user Input Beer 1 Name': [user input features]}, {'Recommendation 1': [recommendation 1 features]}, ..., {'Recommendation N': [recommendation N features]}}
 #    return knn
 
 #******************************************************************************************************************
@@ -1595,7 +1474,6 @@ def graphRecommendations(data):
     dataNames = []
     title = list(data.keys())[0]
     # here we unpack our data.
-#   knn = {'user Input Beer 1 Name': [[user input features], {'Recommendation 1': [recommendation 1 features]}, ... , {'Recommendation N': [recommendation N features]}]}
     for name, features in data.items():
         dataNames.append(name)      # for legend chart
         # next we need to caluclate the angles for each feature
@@ -1615,8 +1493,6 @@ def graphRecommendations(data):
         except:
             print('something happened in plt.polar')
             continue
-#   Fills the polygon that has been drawn onto the grid.
-#    plt.fill(angles, features, alpha = 0.1)
 
         plt.xticks(angles[:-1], featureLabels)
     
@@ -1662,13 +1538,7 @@ def dataSetup(listOfBeerIn, yAvailable = False):
     
     for beer in listOfBeerIn:
         xrow = np.array(beer.getBeerFeaturesMatrix())
-#        print('xrow.shape')#
-#        print(xrow.shape)
-#        print('beerFeatures.shape before stacking')
-#        print(beerFeatures.shape)
         beerFeatures = np.vstack((beerFeatures, xrow))        
-#        print('beerFeatures.shape after stacking')
-#        print(beerFeatures.shape)
         if yAvailable == True:
             yrow = np.array(beer.getBeerCategoryKey())
             beerStyle = np.vstack((beerStyle, yrow))
@@ -1708,12 +1578,7 @@ def optimizeKUsingNumpy(data, style, maxTrainingLabelsCount):
     highestAccuracyAtK = [0] * len(data)
     accuracyLimit = .8
     K = []
-#    counter = -1
     for currentData, currentStyle in zip(data, style):
-#        counter += 1
-#        print('\nOptimizing K using data at index ' + str(counter))
-#        print('currentStyle')
-#        print(currentStyle)
         allSortedDistances = getSortedDistancesUsingNumpy(data, currentData, style)[1:]
         currentK = []        
         for k in range(1, len(data)):      
@@ -1722,7 +1587,6 @@ def optimizeKUsingNumpy(data, style, maxTrainingLabelsCount):
             correctLabelsCounted = (labelsKNN == currentStyle).sum()      
             total = len(distancesKNN)
             accuracy = correctLabelsCounted / total
-#            if accuracy >= accuracyLimit:  # we will omit k with accuracies less than accuracyLimit
             currentK.append([accuracy, k, currentStyle])
             if accuracy > highestAccuracyAtK[k]:
                 highestAccuracyAtK[k] = accuracy
@@ -1731,9 +1595,6 @@ def optimizeKUsingNumpy(data, style, maxTrainingLabelsCount):
                 break
 
         currentK = sorted(currentK, reverse = True)
-#        print('Best Accuracies and K:  ')
-#        print('Accuracy  k')
-#        print(currentK[0])
         if currentK[0][1] not in K and currentK[0][0] > accuracyLimit:
             K.append(int(currentK[0][1]))
     # here we want to get the most common accuracy for each k in K from frequencyOfAccuracyAtEachK.      
@@ -1761,10 +1622,6 @@ def testOptimizedKUsingNumpy(data, style, K):
         highestAccuracyAtK.append([k, float(0)])
 #    indexCounter = -1
     for currentData, currentStyle in zip(data, style):
-#        indexCounter += 1
-#        print('\nTesting K using data at index ' + str(indexCounter))
-#        print('currentStyle')
-#        print(currentStyle)        
         allSortedDistances = getSortedDistancesUsingNumpy(data, currentData, style)[1:]
         currentK = []
         accuracyIndexer = -1
@@ -1779,9 +1636,6 @@ def testOptimizedKUsingNumpy(data, style, K):
             if highestAccuracyAtK[accuracyIndexer][1] < accuracy:
                 highestAccuracyAtK[accuracyIndexer][1] = float(accuracy)
         currentK = sorted(currentK, reverse = True)        
-#        print('Best Accuracies and K:  ')
-#        print('Accuracy    k')
-#        print(np.array(currentK))
     print('\nHighest accuracies at K')
     print(np.array(highestAccuracyAtK))
     fig, ax = plt.subplots()
@@ -1860,7 +1714,7 @@ def graphClassifications(data, title, classDictionary):
 #******************************************************************************************************************
 # Main Menu Functions
     
-def treeMenuOptions():
+def dataMenuOptions():
     # our tree object where we append the nodes and their respective data values.
     BeerCategoryTree = BeerCategoryClass.BeerCategory()
 
@@ -1953,7 +1807,6 @@ def treeMenuOptions():
                     BeerCategoryTree = compileWordCounts(BeerCategoryTree)
                     print('\nWord Count Compile Complete!')
                 elif wordBankChoice == 2:
-#                    saveWordCountsInCategory(BeerCategoryTree)
                     print('\nThis option is not yet available')
                 elif wordBankChoice == 3:
                     print('\nSaving Combined Word Count..')
@@ -1981,7 +1834,7 @@ def treeMenuOptions():
             break        
 
 # Main Menu Option 2
-def dataMenuOptions():
+def machineLearningMenuOptions():
    
     # empty dictionaries of recommendations based on neighbors to userPredict based on different sets of features.
     # our lists of beer objects
@@ -2006,13 +1859,13 @@ def dataMenuOptions():
             print('\nLoading Beer Information..')
             
             allBeer, userInput, userCrossValidation, categoryDictionary = loadBeerInformation(getUser = True, getCategoryDictionary = True)
-            AllBeerDict = {}
+            AllBeerDict = {}    # dictionary of all beer, with the beer's unique key being the key, and the beer's features array being the value
             for beer in allBeer:
                 AllBeerDict[beer.getBeerKey()] = beer.getBeerFeaturesMatrix()
-            userInputDict = {}
+            userInputDict = {}  # dictionary of user input beer, with the beer's unique key being the key, and the beer's features array being the value
             for userP in userInput:
                 userInputDict[userP.getBeerKey()] = userP.getBeerFeaturesMatrix()
-            allNNResult = {}
+            allNNResult = {}    
             
             print('\nLoading Complete')
 
@@ -2059,18 +1912,13 @@ def dataMenuOptions():
                     random.shuffle(shuffledTrainBeer)
                     shuffledTestBeer = testBeer            
                     random.shuffle(shuffledTestBeer)
-
-                    # convert all of our beer data from beer objects to a matrix
-        #            beerFeatures_X, beerStyle_y = dataSetup(trainBeer, yAvailable = True)        
+     
                     trainSetFeatures_X, trainSetStyles_y = dataSetup(trainBeer, yAvailable = True)
                     testSetFeatures_X, testSetStyle_y = dataSetup(testBeer, yAvailable = True)
 
                     print('\nOptimizing K')
                     optimizedK = optimizeKUsingNumpy(trainSetFeatures_X, trainSetStyles_y, maxTrainingLabelsCount)   # this is using list of type [numpy.array(), beerKey], to save time.
                     print('\nOptimizing Complete!')
-
-                    ### for testing purposes
-#                    optimizedK = [1,2,3,4,5,7,8,9,0,3,5,34,56]
 
                     print('\nTesting Optimized K')
                     testOptimizedKUsingNumpy(testSetFeatures_X, testSetStyle_y, optimizedK)
@@ -2079,8 +1927,6 @@ def dataMenuOptions():
 ### kChoice == 2: Classify User Input
                 elif kChoice == 2:
 
-                    # for testing purposes:
-#                    optimizedK = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
                     
                     if len(optimizedK) != 0:
                         # this is where we convert allBeer into data and userPredict and userCrossValidation into data sets
@@ -2099,45 +1945,30 @@ def dataMenuOptions():
                                 print(kResults[0])
                                 print('Style Name:     ')
                                 print(categoryDictionary[int(kResults[1])])
-
-
-                            # here we package up the data to have it graphed.
                     else:
                         print('\nIt might be helpful to run option 1 first..')
 
-                #  Option to run allNNResults for user input and cross validation.
+#  Option to run allNNResults for user input and cross validation.
 
                 if kChoice == 3:                    
                     try:
                         # calculate all nearest neighbor distances
                         print('\nRunning all nearest neighbors algorithm on all features..')
                         allNNResult = calculateAllNN(AllBeerDict, userInputDict)
-#                        print('\nRunning KNN algorithm on all Cross Validation features')
-#                        allNNCrossValidationResult = calculateAllNN(AllBeerDict, userCrossValidationDict)
                         print('\nAll nearest neighbors  calculation complete!')
                     except:
                         print('You need to load your beer data first!')
-#  Option to print the allNNResults and cross validation results
+#  Option to print the allNNResults
                 if kChoice == 4:
                     print('\nHow many B recommendations do you want for each input? ')
                     try:
                         b = int(input())
                     except:
                         print('\nInvalid choice, please choose wisely.')
-#                    try:
-                    print('\nPrinting B Recommendations:')
-
-                    
-        ### SOMETHING GOING ON HERE!
-                    
+                    print('\nPrinting B Recommendations:')                    
                     printBNearestNeighbors(allNNResult, allBeer, b, userInput)
                     print('\nRecommendations complete!')
-#                    print('\nPrinting K Nearest Neighbors Cross Validation Results:')
-#                    knnCrossValidationResult = printKNearestNeighbors(allNNCrossValidationResult, allBeer, k, userCrossValidation)
-#                    except:
-#                        print('\nWe need to run KNN algorithm first!')
-
-#                    
+                    
                 if kChoice != 0:
                     kChoice = -1
                 else:
@@ -2169,9 +2000,9 @@ def main():
         except:
             print('\nInvalid choice, please choose wisely.')
         if(choice == 1):
-            treeMenuOptions()
-        elif(choice == 2):
             dataMenuOptions()
+        elif(choice == 2):
+            machineLearningMenuOptions()
 
         if choice != 0:
             choice = -1
