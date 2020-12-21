@@ -27,4 +27,3 @@ The follow are steps I would like to take on the project given time to do so:
 - Implement other ML techniques: K-Means Clustering is a first to come to mind.
 - Collect all beer data from BeerAdvocate.com, implement a way for a user to choose a beer from the collection to use as an input.
 
-This was a fun project so far, I hope to find time to expand on this project and continue to learn new techniques and methods on data extraction and analysis.
