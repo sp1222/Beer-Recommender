@@ -56,7 +56,20 @@ SCRAPE = 'Scrape\\'
 #******************************************************************************************************************************
 # funtion where selenium gathers html from each web page
 def seleniumGetsHTML(site):
-    ''' Selenium opens the website and BeautifulSoup collects the html '''
+    ''' Selenium opens the website and BeautifulSoup collects the html
+
+    Parameters
+    ----------
+    site : str
+        url to get html for
+
+    Returns
+    ----------
+    html : bs4.BeautifulSoup data structure.
+        html data structure of the url
+
+    '''
+    
 
     driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(site)
@@ -72,8 +85,26 @@ def seleniumGetsHTML(site):
 #******************************************************************************************************************************
 ## returns the text of the starting node.
 # add the first node to the tree here...
-def buildTree(html, site):
-    ''' creates a tree of BeerCategory objects based on the layout of BeerAdvocate.com '''
+def buildTree(html, site = 'https://www.beeradvocate.com/beer/styles'):
+    ''' creates a tree of BeerCategory objects
+    based on the layout of BeerAdvocate.com/beer/styles
+
+    Parameters
+    ----------
+    html : bs4.BeautifulSoup data structure
+        html structure to create tree from
+        
+    site : str
+        url to build tree from
+        defaults to "https://www.beeradvocate.com/beer/styles"
+
+    Returns
+    ----------
+    html : bs4.BeautifulSoup data structure.
+        returns the html for the url being opened
+    
+'''
+    
     # create a root node
     rootNodeOfTree = BeerCategoryClass.BeerCategory()   
     key = 0
@@ -113,7 +144,18 @@ def buildTree(html, site):
 # prints a visual representation of the categories and sub categories tree.
 
 def printCategoryTree(currentCategory, level = 1):
-    ''' Print the BeerCategory tree and its unique key to screen '''
+    ''' Print the BeerCategory tree and its unique key to screen 
+
+    Parameters
+    ----------
+    currentCategory : BeerCategory object, root of the tree
+        object that holds data of beer category
+        
+    level : int
+        defines which level of the tree is being printed
+        defaults to 1
+
+    '''
 
     if currentCategory.doSubCategoriesExist() == True:
         for sub in currentCategory.getSubCategories():
@@ -127,7 +169,14 @@ def printCategoryTree(currentCategory, level = 1):
 # Sending tree information to an excel sheet.
 
 def createWorkbookForEachCategories(root):
-    ''' Creates xlsx workbooks to store collected information for each BeerCategory object with Beer objects '''
+    ''' Creates xlsx workbooks to store collected information for each BeerCategory object with Beer objects
+
+    Parameters
+    ----------
+    root : BeerCategory object, root of the tree
+        root object of the beer category tree
+        
+    '''
 
     for category in root.getSubCategories():
         for subCategory in category.getSubCategories():
@@ -493,8 +542,21 @@ def __addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
 # Get information from excel file, given that there is an implemented tree already made and information
 # just needs to be filled in
 
-def loadSubCategories(tree):
-    ''' Fills an empty tree with already saved data into subcategories with beer objects '''
+def loadSubCategories(root):
+    ''' Fills an empty tree with already saved data into subcategories with beer objects
+
+    Parameters
+    ----------
+    root : BeerCategory object
+        root object of the beer category tree
+
+    Returns
+    ----------
+    root : BeerCategory object
+        root object of the beer category tree
+        tree is updated with category information collected in files
+        
+    '''
            
     # first we need to see if the name of the categories we want to collect data from exist as files
     fileList = os.listdir(FILE_DIRECTORY + BEER_ALL_INFO)
@@ -510,7 +572,7 @@ def loadSubCategories(tree):
         wb = load_workbook(excel)
         wb.active = 0
         key = int(wb.active.cell(row = 2, column = 2).value)
-        for category in tree.getSubCategories():
+        for category in root.getSubCategories():
             for subCategory in category.getSubCategories():
                 if subCategory.getCategoryKey() == key:
                     print('Loading Style: ' + subCategory.getCategoryName())
@@ -528,7 +590,7 @@ def loadSubCategories(tree):
                     
     print('loading complete')
 
-    return tree
+    return root
 
 def __gatherInformation(index, wb, tempCategory):
     # pull saved information from the xlsx files starting with category information
@@ -670,8 +732,28 @@ def __gatherInformation(index, wb, tempCategory):
 ## these sets of functions web scrapes heb.com in each category and loads items to their respective categories
 ## in the category tree.
 
-def startGetCategoryItems(root, site):
-    ''' Open BeerAdvocate.com using Selenium and collects the first 50 available beers of each category '''
+def startGetCategoryItems(root, site = 'https://www.beeradvocate.com'):
+    ''' Open BeerAdvocate.com using Selenium and collects the first 50 available beers of each category
+
+    url extensions for each category are collected during the tree building process
+    extends the site variable to open that webpage using selenium
+
+    Parameters
+    ----------
+    root : BeerCategory object
+        root of the beer category tree
+
+    site : str
+        base url to start gathering objects process from
+        defaults to "https://www.beeradvocate.com"
+
+    Returns
+    ----------
+    root : BeerCategory object
+        root of the beer cateogry tree
+        tree is updated with list of beer objects collected from beeradvocate.com
+    
+    '''
 
     sinceEpoch = time.time()
     startTimeObj = time.localtime(sinceEpoch)
@@ -863,7 +945,21 @@ def __openSubCategoryPages(currentCategory, dr, site, key):
 def reassignKeys(root):
     ''' Reassign key values to all beer objects.
     In the case that the internet connection is disrupted,
-    the user can redefine beer keys so that each key is definitively unique. '''
+    the user can redefine beer keys so that each key is definitively unique
+
+    Parameters
+    ----------
+    root : BeerCategory object
+        root of the beer category tree
+
+    Returns
+    ----------
+    root : BeerCategory object
+        root of the beer category tree
+        tree is updated with unique keys for each beer object
+
+    
+    '''
     key = 0
     for category in root.getSubCategories():
         for subCategory in category.getSubCategories():
@@ -878,7 +974,20 @@ def reassignKeys(root):
 def compileWordCounts(root):
     ''' Returns a dictionary of words and word counts extracted from collected reviews.
     This exludes a short list of unwanted words such as "and, a, the, etc..".
-    The words kept comes from an approved list of words that define a beer's characteristic '''
+    The words kept comes from an approved list of words that define a beer's characteristic
+
+    Parameters
+    ----------
+    root : BeerCategory object
+        root of the beer category tree
+
+    Returns
+    ----------
+    root : BeerCategory object
+        root of the beer category tree
+        updated with compiled word counts for each beer object of each class
+    
+    '''
 
     # remove unwanted words.
     invalidWords = []
@@ -980,7 +1089,14 @@ def combineWordCounts(root):
     ''' compiles a list of all accepted words and respective word counts after compileWordCount is complete.
     Saves the list of all words and word counts to an xlsx file.
     This was used to determine the frequency of all accepted words in all reviews collected,
-    and to build a key word bank that defined the features of a beer. '''
+    and to build a key word bank that defined the features of a beer.
+    
+    Parameters
+    ----------
+    root : BeerClass object
+        root of the beer category tree
+
+    '''
     combineWordCount = {}
 
     for category in root.getSubCategories():
@@ -1020,11 +1136,18 @@ def combineWordCounts(root):
 
 def compileFeaturesDefinitions():
     ''' returns a dictionary of beer feature and their respective word key and impact value.
-    features = { feature : { word1 : impact1 } ... { wordN : impactN } }
     All word's impact value are currently set to 1
     Open and load feature definitions
     This determines which feature of a beer each word counted in a beer's review impacts
-    This is essentially a feature definition file being loaded. '''
+    This is essentially a feature definition file being loaded.
+    
+    Returns
+    ----------
+    features : dict
+        dictionary of features and their definitions via word in review
+        features = { feature : { word1 : impact1 } ... { wordN : impactN } }
+    
+    '''
     features = {}    # an array of 19 features, dictionary of word with a magnitude of impact
     
     fileName = KEYWORD_BANK
@@ -1082,10 +1205,25 @@ def compileFeaturesDefinitions():
 # matrix: [astringent, mouthfeel, alcohol, bitter, sweet, sour, salty, fruity, hoppy, spicy, malty]
 def wordCountToFeatures(root, features):
     ''' Returns the beer style/category tree after populating beer features matrix for each beer
-
     Convert the word counts into beer features based on the predefined key word bank.
     Key word bank simply states which word found impacts which feature in a beer.
-    For example, the word "dry" appearing 12 times from a beer's collected reviews will add 12 to the "Astringency" feature. '''
+    For example, the word "dry" appearing 12 times from a beer's collected reviews will add 12 to the "Astringency" feature.
+
+    Parameters
+    ----------
+    root : BeerCategory object
+        root of the beer category tree
+
+    features : dict
+        dictionary of features and their definitions via word in review
+        features = { feature : { word1 : impact1 } ... { wordN : impactN } }
+
+    Returns
+    ----------
+    root : BeerCategory object
+        root of the beer category tree    
+    
+    '''
     for category in root.getSubCategories():
         for subCategory in category.getSubCategories():
             for beer in subCategory.getCategoryBeers():   
@@ -1119,7 +1257,9 @@ def wordCountToFeatures(root, features):
 def gatherUserInputInformation():
     ''' Collect information from BeerAdvocate.com on previously uncollected beer to use as user input,
     and saves the information to an xlsx file.
-    Currently, this is a static list of beer being used as input to test the classification recommendation systems. '''
+    Currently, this is a static list of beer being used as input to test the classification recommendation systems.
+        
+    '''
     
     startPage = 'https://www.beeradvocate.com/'
     beerURLs = ['beer/profile/148/11436/',      # Scottish Ale 80 Shillings
@@ -1300,7 +1440,22 @@ def gatherUserInputInformation():
 # this function loads the basic information for all 5700 beer for machine learning application
 # with the option to load user beer input from file as well.
 def loadBeerInformation(getCategoryDictionary = False):
-    ''' Returns a list of beer objects loaded from xlsx style/category files '''
+    ''' Returns a list of beer objects loaded from xlsx style/category files
+
+    Parameters
+    ----------
+    getCategoryDictionary : bool
+        determines of function returns category dictionary
+        currently does not do anything during the process
+        defaults to False
+
+    Returns
+    ----------
+    beerList : list
+        list of beer objects
+
+    '''
+    
     beerList = []
 
     # first we need to see if the name of the categories we want to collect data from exist as files
@@ -1380,7 +1535,14 @@ def loadBeerInformation(getCategoryDictionary = False):
 # Saves beer information to a csv file.
 
 def saveBeerInformation(beers):
-    ''' Saves a list of beer objects with their data in a csv format '''
+    ''' Saves a list of beer objects with their data in a csv format
+    
+    Parameters
+    ----------
+    beers : list
+        list of beer objects    
+    
+    '''
     wb = Workbook()
     wb.create_sheet(index = 0)
     wb.active = 0
@@ -1500,6 +1662,7 @@ def saveBeerInformation(beers):
 # main
 
 def main():
+    ''' main function, displays options to run project '''
     # our tree object where we append the nodes and their respective data values.
     BeerCategoryTree = BeerCategoryClass.BeerCategory()
 
@@ -1530,7 +1693,7 @@ def main():
             customStartingPoint = '/beer/styles'
             soupSource = seleniumGetsHTML(beerURL + customStartingPoint)
             # get the tree's starting node.
-            BeerCategoryTree = buildTree(soupSource, beerURL)
+            BeerCategoryTree = buildTree(soupSource)
             print('\nTree has been built!')
             
         elif(choice == 2):
