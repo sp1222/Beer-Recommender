@@ -1,3 +1,23 @@
+''' Beer_Data_Collection
+
+Module designed to collect beer information from BeerAdvocate.com
+and store the information in xlsx files for ease of readability.
+
+
+The program uses Selenium to open BeerAdvocate.com, scrape data,
+and stores them in BeerCategory and Beer objects.  If there is a
+disconnect in the network during the collection process, Selenium
+will try reconnecting every 30 seconds until a connection is
+re-established.  BeautifulSoup is used to search the html format
+for tags of interest to collect the data.
+
+
+The program can compile word counts for further analysis.
+The data is then saved in xlsx format for each style for ease of
+readability, and save all beer information in one csv format.
+
+'''
+
 from bs4 import BeautifulSoup
 from openpyxl import Workbook
 from openpyxl import load_workbook
@@ -6,10 +26,12 @@ from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 import BeerCategoryClass
 import BeerClass
+import numpy as np
 import os
 import re
 import time
 
+#******************************************************************************************************************************
 # CONSTANTS
 # the starting row of beer information
 BEER_REVIEW_START_ROW = 21
@@ -31,8 +53,10 @@ OMITTED_WORDS = 'omitted words.txt'
 KEYWORD_BANK = 'Keyword Bank\\'
 SCRAPE = 'Scrape\\'
 
+#******************************************************************************************************************************
 # funtion where selenium gathers html from each web page
 def seleniumGetsHTML(site):
+    ''' Selenium opens the website and BeautifulSoup collects the html '''
 
     driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.get(site)
@@ -45,10 +69,11 @@ def seleniumGetsHTML(site):
 
     return html
 
+#******************************************************************************************************************************
 ## returns the text of the starting node.
 # add the first node to the tree here...
 def buildTree(html, site):
-    
+    ''' creates a tree of BeerCategory objects based on the layout of BeerAdvocate.com '''
     # create a root node
     rootNodeOfTree = BeerCategoryClass.BeerCategory()   
     key = 0
@@ -86,7 +111,9 @@ def buildTree(html, site):
 #******************************************************************************************************************************
 # Outputting tree to screen
 # prints a visual representation of the categories and sub categories tree.
-def printCategoryTree(currentCategory, level):
+
+def printCategoryTree(currentCategory, level = 1):
+    ''' Print the BeerCategory tree and its unique key to screen '''
 
     if currentCategory.doSubCategoriesExist() == True:
         for sub in currentCategory.getSubCategories():
@@ -99,19 +126,23 @@ def printCategoryTree(currentCategory, level):
 #*******************************************************************************************************
 # Sending tree information to an excel sheet.
 
-def createWorkbookForAllCategories(root):
+def createWorkbookForEachCategories(root):
+    ''' Creates xlsx workbooks to store collected information for each BeerCategory object with Beer objects '''
 
     for category in root.getSubCategories():
         for subCategory in category.getSubCategories():
             print('Saving Style to \\New_All_Beer_Info folder: ' + subCategory.getCategoryName())
             wb = Workbook()
             categoryName = re.sub('\/', 'and', subCategory.getCategoryName())
-            addStyleToNewWorkbook(wb, subCategory, 'None', -1, index = 0)
+            __addStyleToNewWorkbook(wb, subCategory, 'None', -1, index = 0)
             openFile = NEW_BEER_ALL_INFO + categoryName + '.xlsx'
             wb.save(openFile)
 
 
-def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
+def __addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
+    # enters data stored in category object into xlsx file.
+    # first page is information pertaining to the category.
+    
     currentRow = 0
     currentColumn = 0
 
@@ -170,7 +201,7 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
     catDesc = sheet.cell(row = 10, column = 2)    
     catDesc.value = currentCategory.getCategoryMaxIBU()
 
-    ## category features go here.
+    ## category's features go here.
     currentRow = CATEGORY_FEATURES_START_ROW
     if len(currentCategory.getCategoryFeaturesMatrix()) == MAX_NUMBER_OF_FEATURES:
         feature = currentCategory.getCategoryFeaturesMatrix()
@@ -463,6 +494,7 @@ def addStyleToNewWorkbook(wb, currentCategory, pName, pkey, index):
 # just needs to be filled in
 
 def loadSubCategories(tree):
+    ''' Fills an empty tree with already saved data into subcategories with beer objects '''
            
     # first we need to see if the name of the categories we want to collect data from exist as files
     fileList = os.listdir(FILE_DIRECTORY + BEER_ALL_INFO)
@@ -482,7 +514,7 @@ def loadSubCategories(tree):
             for subCategory in category.getSubCategories():
                 if subCategory.getCategoryKey() == key:
                     print('Loading Style: ' + subCategory.getCategoryName())
-                    subCategory = gatherInformation(0, wb, subCategory)
+                    subCategory = __gatherInformation(0, wb, subCategory)
                     subCategory.setCategoryParent(category)
                     keyFound == True
                     break
@@ -498,7 +530,10 @@ def loadSubCategories(tree):
 
     return tree
 
-def gatherInformation(index, wb, tempCategory):
+def __gatherInformation(index, wb, tempCategory):
+    # pull saved information from the xlsx files starting with category information
+    # then collect beer information for each category.
+    
     wb.active = index
     sheet = wb.active
     tempCategory.setCategoryName(sheet.cell(row = 1, column = 2).value)    
@@ -516,7 +551,8 @@ def gatherInformation(index, wb, tempCategory):
     i = 0
     features = [] 
     index += 1
-    
+
+    # get each beer information here.
     while index < len(wb.worksheets):
         wb.active = index
         sheet = wb.active
@@ -615,6 +651,7 @@ def gatherInformation(index, wb, tempCategory):
             tempItem.setBeerFeaturesMatrix(features)
             
 ### LOAD BEER WORD COUNTS
+# UNDER CONSTRUCTION
 #            currentRow += 6
 #            currentColumn = 1
 #            currentCell = sheet.cell()
@@ -634,6 +671,7 @@ def gatherInformation(index, wb, tempCategory):
 ## in the category tree.
 
 def startGetCategoryItems(root, site):
+    ''' Open BeerAdvocate.com using Selenium and collects the first 50 available beers of each category '''
 
     sinceEpoch = time.time()
     startTimeObj = time.localtime(sinceEpoch)
@@ -656,7 +694,7 @@ def startGetCategoryItems(root, site):
             # to save time
             if len(eachSubCategory.getCategoryBeers()) == 0:
                 print('Scraping ' + eachSubCategory.getCategoryName())
-                key = openSubCategoryPages(eachSubCategory, driver, site, key)
+                key = __openSubCategoryPages(eachSubCategory, driver, site, key)
     
     driver.close()
     driver.quit()
@@ -669,7 +707,7 @@ def startGetCategoryItems(root, site):
 
     return root
 
-def cleanupDoubleValueStrings(string):
+def __cleanupDoubleValueStrings(string):
 
     print(string)
 
@@ -693,14 +731,14 @@ def cleanupDoubleValueStrings(string):
     print('maxVal: ' + str(maxVal))
     return minVal, maxVal
 
-def cleanUpSingleValueString(string):
+def __cleanUpSingleValueString(string):
 
     if string != '' or string != None:
         newString = re.sub('[a-zA-Z()\s$/%:]', '', string)
     return newString
     
 
-def openSubCategoryPages(currentCategory, dr, site, key):
+def __openSubCategoryPages(currentCategory, dr, site, key):
 
     # open pages of sub categories to get to list of beer   
     currentSite = site + currentCategory.getCategory_href()
@@ -716,8 +754,8 @@ def openSubCategoryPages(currentCategory, dr, site, key):
     detailsTag = detailsTag.findAll('div')[0]
     currentCategory.setCategoryDescription(detailsTag.get_text())
     decimals = detailsTag.findAll('span')
-    minABV, maxABV = cleanupDoubleValueStrings(decimals[0].get_text())
-    minIBU, maxIBU = cleanupDoubleValueStrings(decimals[1].get_text())
+    minABV, maxABV = __cleanupDoubleValueStrings(decimals[0].get_text())
+    minIBU, maxIBU = __cleanupDoubleValueStrings(decimals[1].get_text())
     try:
         currentCategory.setCategoryMinABV(float(minABV))
         currentCategory.setCategoryMaxABV(float(maxABV))
@@ -772,7 +810,7 @@ def openSubCategoryPages(currentCategory, dr, site, key):
         thisBeer.setBeerStyle(currentCategory.getCategoryName())
         # for finding beer stats
         beerStats = thisBeerHTML.findAll('dd', {'class': 'beerstats'})
-        abv = cleanUpSingleValueString(beerStats[1].get_text())
+        abv = __cleanUpSingleValueString(beerStats[1].get_text())
         try:
             thisBeer.setBeerABV(float(abv))
         except:
@@ -809,18 +847,23 @@ def openSubCategoryPages(currentCategory, dr, site, key):
     # because SPECTRUM...
     wb = Workbook()
     print('Saving current category to \\Scrape folder: ' + currentCategory.getCategoryName())
-    addStyleToNewWorkbook(wb, currentCategory, currentCategory.getCategoryName(), currentCategory.getCategoryKey(), index = 0)
+    __addStyleToNewWorkbook(wb, currentCategory, currentCategory.getCategoryName(), currentCategory.getCategoryKey(), index = 0)
     name = re.sub('\/', 'and',currentCategory.getCategoryName())
     openFile = SCRAPE + name + '.xlsx'
     wb.save(openFile)
 
 
-    return key
+    return key  # return the value of the current key to avoid duplicate key values..
+                # consider changing the format of the key value to avoid this return..
 
 #*******************************************************************************************************************************
 # Manual Key Reassignment to individual beers so that each beer is garaunteed a unique key
+# This is to be used in the case that the internet connection drops and I has to pick up where I left off.
 
 def reassignKeys(root):
+    ''' Reassign key values to all beer objects.
+    In the case that the internet connection is disrupted,
+    the user can redefine beer keys so that each key is definitively unique. '''
     key = 0
     for category in root.getSubCategories():
         for subCategory in category.getSubCategories():
@@ -833,7 +876,11 @@ def reassignKeys(root):
 # set of functions build keyword data banks
 
 def compileWordCounts(root):
+    ''' Returns a dictionary of words and word counts extracted from collected reviews.
+    This exludes a short list of unwanted words such as "and, a, the, etc..".
+    The words kept comes from an approved list of words that define a beer's characteristic '''
 
+    # remove unwanted words.
     invalidWords = []
     file = open(KEYWORD_BANK + OMITTED_WORDS, 'r')
     for word in file:
@@ -853,7 +900,8 @@ def compileWordCounts(root):
 #            subCategoryWordCountDictionary = {}  # will house dictionaries in sub category
             # gets words from the description of the sub category
             # as stated by BeerAdvocate                    
-            # for getting beer dictionaries of words           
+            # for getting beer dictionaries of words
+            
             for beer in subCategory.getCategoryBeers():                
                 currentBeerWordCountDictionary = {} # empty dictionary of word count for current beer
                 # gets words from the description of the beer
@@ -929,6 +977,10 @@ def compileWordCounts(root):
 # function to get a combined word count from all beers.  This is to assist with sifting for beer related words manually
 
 def combineWordCounts(root):
+    ''' compiles a list of all accepted words and respective word counts after compileWordCount is complete.
+    Saves the list of all words and word counts to an xlsx file.
+    This was used to determine the frequency of all accepted words in all reviews collected,
+    and to build a key word bank that defined the features of a beer. '''
     combineWordCount = {}
 
     for category in root.getSubCategories():
@@ -967,7 +1019,12 @@ def combineWordCounts(root):
 # each count on a word will impact the order of magnitude for the feature it is stored under
 
 def compileFeaturesDefinitions():
-
+    ''' returns a dictionary of beer feature and their respective word key and impact value.
+    features = { feature : { word1 : impact1 } ... { wordN : impactN } }
+    All word's impact value are currently set to 1
+    Open and load feature definitions
+    This determines which feature of a beer each word counted in a beer's review impacts
+    This is essentially a feature definition file being loaded. '''
     features = {}    # an array of 19 features, dictionary of word with a magnitude of impact
     
     fileName = KEYWORD_BANK
@@ -1019,11 +1076,16 @@ def compileFeaturesDefinitions():
     # next we iterate through the word counts of each beer and keep the words that match those in beerDescriptors.
     return features
 
+#******************************************************************************************************************************
 # This function cycles through each feature's list of keywords (definition of features if you will)
 # If a word from the beer's word count matches the feature's keyword, then it adds plus 1 to the feature matrix for that feature
 # matrix: [astringent, mouthfeel, alcohol, bitter, sweet, sour, salty, fruity, hoppy, spicy, malty]
 def wordCountToFeatures(root, features):
+    ''' Returns the beer style/category tree after populating beer features matrix for each beer
 
+    Convert the word counts into beer features based on the predefined key word bank.
+    Key word bank simply states which word found impacts which feature in a beer.
+    For example, the word "dry" appearing 12 times from a beer's collected reviews will add 12 to the "Astringency" feature. '''
     for category in root.getSubCategories():
         for subCategory in category.getSubCategories():
             for beer in subCategory.getCategoryBeers():   
@@ -1046,7 +1108,7 @@ def wordCountToFeatures(root, features):
             matrixOfSubCategoryFeatures = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             for beer in subCategory.getCategoryBeers():
                 matrixOfSubCategoryFeatures = np.add(matrixOfSubCategoryFeatures, beer.getBeerFeaturesMatrix())
-            matrixOfSubCategoryFeatures = matrixOfSubCategoryFeatures // len(subCategory.getCategoryBeers())
+            matrixOfSubCategoryFeatures = matrixOfSubCategoryFeatures / len(subCategory.getCategoryBeers())
             subCategory.setCategoryFeaturesMatrix(matrixOfSubCategoryFeatures)
     
     return root
@@ -1055,7 +1117,10 @@ def wordCountToFeatures(root, features):
 # Functions to gather data on select user inputs and store the data in a file.
 
 def gatherUserInputInformation():
-
+    ''' Collect information from BeerAdvocate.com on previously uncollected beer to use as user input,
+    and saves the information to an xlsx file.
+    Currently, this is a static list of beer being used as input to test the classification recommendation systems. '''
+    
     startPage = 'https://www.beeradvocate.com/'
     beerURLs = ['beer/profile/148/11436/',      # Scottish Ale 80 Shillings
                 'beer/profile/335/2904/',       # IPA American Mad Hatter
@@ -1223,11 +1288,216 @@ def gatherUserInputInformation():
         beer.setBeerFeaturesMatrix(matrixOfBeerFeatures)
 
     wb = Workbook()
-    addStyleToNewWorkbook(wb, userCategory, userCategory.getCategoryName(), userCategory.getCategoryKey(), index = 0)
+    __addStyleToNewWorkbook(wb, userCategory, userCategory.getCategoryName(), userCategory.getCategoryKey(), index = 0)
     name = re.sub('\/', 'and',userCategory.getCategoryName())
     file = SCRAPE
     openFile = file + name + '.xlsx'
     wb.save(openFile)
+
+
+
+#********************************************************************************************************************************
+# this function loads the basic information for all 5700 beer for machine learning application
+# with the option to load user beer input from file as well.
+def loadBeerInformation(getCategoryDictionary = False):
+    ''' Returns a list of beer objects loaded from xlsx style/category files '''
+    beerList = []
+
+    # first we need to see if the name of the categories we want to collect data from exist as files
+    fileList = os.listdir(FILE_DIRECTORY + BEER_ALL_INFO)
+    print('Gathering File Names..')
+    fileName = BEER_ALL_INFO
+    for file in fileList:
+        wb = load_workbook(fileName + file)
+        if getCategoryDictionary == True:
+            index = 0
+            wb.active = index
+            sheet = wb.active
+            dictionary[float(sheet.cell(row = 2, column = 2).value)] = str(sheet.cell(row = 1, column = 2).value)
+        
+        index = 1
+        print('Getting beer information from ' + file)
+        while index < len(wb.worksheets):
+            beer = BeerClass.Beer()            
+            wb.active = index
+            sheet = wb.active
+            
+            currentRow = 1
+            currentColumn = 2
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerName(re.sub('\n\0','',currentCell.value))
+            
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerKey(int(currentCell.value))
+            
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerStyle(re.sub('\n\0','',currentCell.value))
+            
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerCategoryKey(int(currentCell.value))
+            
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerBrewery(re.sub('\n\0','',currentCell.value))
+            
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerAverageRating(float(currentCell.value))
+            currentRow += 1
+            
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerABV(float(currentCell.value))
+            currentRow += 1
+            
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerMinIBU(int(currentCell.value))
+            currentRow += 1
+            
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerMaxIBU(int(currentCell.value))
+            
+            currentRow += 1
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerDescription(re.sub('\n\0','',currentCell.value))
+
+            features = []
+            currentRow = BEER_FEATURES_START_ROW
+            currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            while currentCell.value != '' and currentCell.value != None:
+                features.append(int(currentCell.value))
+                currentRow += 1
+                currentCell = sheet.cell(row = currentRow, column = currentColumn)
+            beer.setBeerFeaturesMatrix(features)
+            beerList.append(beer)
+            index += 1
+            
+    return beerList
+
+#******************************************************************************************************************************
+# Saves beer information to a csv file.
+
+def saveBeerInformation(beers):
+    ''' Saves a list of beer objects with their data in a csv format '''
+    wb = Workbook()
+    wb.create_sheet(index = 0)
+    wb.active = 0
+    sheet = wb.active
+    
+    label = sheet.cell(row = 1, column = 1)
+    label.value = 'Name'
+    label = sheet.cell(row = 1, column = 2)
+    label.value = 'Key'
+    label = sheet.cell(row = 1, column = 3)
+    label.value = 'Style'
+    label = sheet.cell(row = 1, column = 4)
+    label.value = 'Style Key'
+    label = sheet.cell(row = 1, column = 5)
+    label.value = 'Brewery'
+    label = sheet.cell(row = 1, column = 6)
+    label.value = 'Description'
+    label = sheet.cell(row = 1, column = 7)
+    label.value = 'Ave Rating'
+    label = sheet.cell(row = 1, column = 8)
+    label.value = 'ABV'
+    label = sheet.cell(row = 1, column = 9)
+    label.value = 'Min IBU'
+    label = sheet.cell(row = 1, column = 10)
+    label.value = 'Max IBU'
+    label = sheet.cell(row = 1, column = 11)
+    label.value = 'Astringency'
+    label = sheet.cell(row = 1, column = 12)
+    label.value = 'Body'
+    label = sheet.cell(row = 1, column = 13)
+    label.value = 'Alcohol'
+    label = sheet.cell(row = 1, column = 14)
+    label.value = 'Bitter'
+    label = sheet.cell(row = 1, column = 15)
+    label.value = 'Sweet'
+    label = sheet.cell(row = 1, column = 16)
+    label.value = 'Sour'
+    label = sheet.cell(row = 1, column = 17)
+    label.value = 'Salty'
+    label = sheet.cell(row = 1, column = 18)
+    label.value = 'Fruits'
+    label = sheet.cell(row = 1, column = 19)
+    label.value = 'Hoppy'
+    label = sheet.cell(row = 1, column = 20)
+    label.value = 'Spices'
+    label = sheet.cell(row = 1, column = 21)
+    label.value = 'Malty'
+    label = sheet.cell(row = 1, column = 22)
+    
+    currentRow = 2
+    currentColumn = 1       
+
+    for eachItem in beers:        
+        
+        label = sheet.cell(row = currentRow, column = currentColumn)
+        label.value = re.sub(',', ' ', eachItem.getBeerName())
+        currentColumn += 1
+        
+        label = sheet.cell(row = currentRow, column = currentColumn)
+        label.value = eachItem.getBeerKey()
+        currentColumn += 1
+        
+        label = sheet.cell(row = currentRow, column = currentColumn)
+        label.value = eachItem.getBeerStyle()
+        currentColumn += 1
+        
+        label = sheet.cell(row = currentRow, column = currentColumn)
+        label.value = eachItem.getBeerCategoryKey()
+        currentColumn += 1
+        
+        label = sheet.cell(row = currentRow, column = currentColumn)
+        label.value = re.sub(',', ' ', eachItem.getBeerBrewery())
+        currentColumn += 1
+        
+        label = sheet.cell(row = currentRow, column = currentColumn)
+        label.value = re.sub(',', ' ', eachItem.getBeerDescription())
+        currentColumn += 1
+        
+        label = sheet.cell(row = currentRow, column = currentColumn)
+        label.value = eachItem.getBeerAverageRating()
+        currentColumn += 1
+        
+        label = sheet.cell(row = currentRow, column = currentColumn)
+        label.value = eachItem.getBeerABV()
+        currentColumn += 1
+        
+        label = sheet.cell(row = currentRow, column = currentColumn)
+        label.value = eachItem.getBeerMinIBU()
+        currentColumn += 1
+               
+        label = sheet.cell(row = currentRow, column = currentColumn)
+        label.value = eachItem.getBeerMaxIBU()
+        currentColumn += 1
+
+        for feature in eachItem.getBeerFeaturesMatrix():
+               
+            label = sheet.cell(row = currentRow, column = currentColumn)
+            label.value = feature
+            currentColumn += 1
+
+#        for review in eachItem.getBeerReviewsFullContent():
+#            accumulated
+#            label = sheet.cell(row = currentRow, column = currentColumn)
+#            label.value = eachItem.getBeerDescription()
+
+        currentColumn += 1        
+
+        currentRow += 1
+        currentColumn = 1
+    
+    
+    openFile = 'New_Beer_All_Info\\Beer_Data_Set.csv'
+    wb.save(openFile)
+
+
+#**************************************************************************************************************************************************
+# main
 
 def main():
     # our tree object where we append the nodes and their respective data values.
@@ -1283,12 +1553,12 @@ def main():
         elif(choice == 3):
             print('\nPrinting category tree to screen..\n')
             print(BeerCategoryTree.getCategoryName())
-            printCategoryTree(BeerCategoryTree, 1)
+            printCategoryTree(BeerCategoryTree)
             print('\nTree has been printed!')
             
         elif(choice == 4):
             print('\nSaving to file..')
-            createWorkbookForAllCategories(BeerCategoryTree)
+            createWorkbookForEachCategories(BeerCategoryTree)
             print('\nSaving complete!')
             
         elif(choice == 5):
@@ -1305,7 +1575,7 @@ def main():
         elif(choice == 7):
             
             wordBankChoice = -1
-            while wordBankChoice < 0 or wordBankChoice > 4:
+            while wordBankChoice < 0 or wordBankChoice > 5:
                 wordBankChoice = -1
                 print('\nWord Count Options')
                 print('0. Go Back')
@@ -1313,6 +1583,7 @@ def main():
                 print('2. Save Word Counts to a separate file - NOT YET AVAILABLE')
                 print('3. Save combined word count to file')
                 print('4. Compile features matrix based on keywords')
+                print('5. Save All Current Beer Data as One CSV')
                 try:
                     wordBankChoice = int(input())
                 except:
@@ -1332,6 +1603,13 @@ def main():
                     print('\nConverting Word Counts To Features, this will take a few minutes..')
                     wordCountToFeatures(BeerCategoryTree, beerFeatures)
                     print('\nConverting Word Counts To Features Complete!')
+                elif wordBankChoice == 5:
+                    print('\nLoading Available Beer Information..')
+                    aBeers = loadBeerInformation()
+                    print('\nLoading Complete!')
+                    print('\nSaving Beer Information to .csv File..')
+                    saveBeerInformation(aBeers)
+                    print('\nSaving Complete!')
                 if wordBankChoice != 0:
                     wordBankChoice = -1
                 else:
@@ -1349,4 +1627,5 @@ def main():
             break
 
 
-main()
+if __name__ == '__main__':
+    main()
