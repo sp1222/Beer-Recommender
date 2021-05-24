@@ -1,46 +1,108 @@
+'''Beer Classifier and Recommender
+
+Use defined features of beer objects from data collection
+with kNN algorithm to classify and recommend beer.
+
+Displays the results with graphical representation
+
+
+Imports
+----------
+collections
+    Counter
+math
+    pi
+openpyxl
+    Workbook
+    load_workbook
+sklearn.preprocessing
+    normalize
+BeerClass
+matplotlib
+numpy
+os
+random
+re
+time
+
+
+'''
+
 from collections import Counter
 from math import pi
 from openpyxl import Workbook
 from openpyxl import load_workbook
-import BeerCategoryClass
+from sklearn.preprocessing import normalize
 import BeerClass
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 import random
+import re
 import time
 
 # CONSTANTS
-# the starting row of beer information
-#BEER_REVIEW_START_ROW = 21
 BEER_FEATURES_START_ROW = 50
-#BEER_WORD_COUNT_START_ROW = 70
 
 # the starting row of category information
 CATEGORY_FEATURES_START_ROW = 15
-#CATEGORY_BEER_REVIEW_COUNT = 41
 
 # number of features in a beer
 MAX_NUMBER_OF_FEATURES = 11
 
 # File Names:
 BEER_ALL_INFO = 'Beer_All_Info\\'
-#NEW_BEER_ALL_INFO = 'New_Beer_All_Info\\'
 FILE_DIRECTORY = 'D:\\Python Projects\\Beer Recommender Project\\'
-#OMITTED_WORDS = 'omitted words.txt'
-#KEYWORD_BANK = 'Keyword Bank\\'
-#SCRAPE = 'Scrape\\'
 
 
 #********************************************************************************************************************************
 # this function loads the basic information for all 5700 beer for machine learning application
 # with the option to load user beer input from file as well.
-def loadBeerInformation(getUser = False, getCategoryDictionary = False):
+def loadBeerInformation(getUser = False, getCategoryDictionary = False, normalizeFeatures = False):
+    ''' Returns a list of beer objects loaded from xlsx style/category files
 
+    Parameters
+    ----------
+    getUser : bool
+        determines if function returns static user input data
+        defaults to False
+        
+    getCategoryDictionary : bool
+        determines if function returns category dictionary
+        defaults to False
+
+    normalizeFeatures : bool
+        determines if function normalizes all of the BeerClass\'s feature matrix
+        defaults to False
+        UNDER CONSTRUCTION
+
+    Returns
+    ----------
+    beerList : list
+        list of BeerClass objects
+        beerList will always be returned
+
+    userBeerList : list
+        list of BeerClass objects as static user input
+        returns if getUser == True
+
+    userCV : list
+        list of BeerClass objects for cross validation
+        returns if getUser == True
+
+    categoryDictionary : dict
+        dictionary of key-value pairs "categoryKey: categoryName"
+        dictionary[ float(categoryKey) ] = str(categoryName)
+        returns if getUser == True and getCategoryDictionary == True
+
+
+    '''
+    
     beerList = []
+    normalized = np.empty(MAX_NUMBER_OF_FEATURES)
     if getCategoryDictionary == True:
-        dictionary = {}
+        categoryDictionary = {}
 
     # first we need to see if the name of the categories we want to collect data from exist as files
     fileList = os.listdir(FILE_DIRECTORY + BEER_ALL_INFO)
@@ -52,7 +114,7 @@ def loadBeerInformation(getUser = False, getCategoryDictionary = False):
             index = 0
             wb.active = index
             sheet = wb.active
-            dictionary[float(sheet.cell(row = 2, column = 2).value)] = str(sheet.cell(row = 1, column = 2).value)
+            categoryDictionary[float(sheet.cell(row = 2, column = 2).value)] = str(sheet.cell(row = 1, column = 2).value)
         
         index = 1
         print('Getting beer information from ' + file)
@@ -96,18 +158,27 @@ def loadBeerInformation(getUser = False, getCategoryDictionary = False):
                 features.append(int(currentCell.value))
                 currentRow += 1
                 currentCell = sheet.cell(row = currentRow, column = currentColumn)
-            beer.setBeerFeaturesMatrix(features)
+            beer.setBeerFeaturesMatrix(features)   
             beerList.append(beer)
             index += 1
 
-    if getUser == True:
-            
+#### LEFT OFF HERE WITH NORMALIZING DATA
+    if normalizeFeatures == True:
+        for b in beerList:
+            normalized = np.vstack((normalized, np.array(b.getBeerFeaturesMatrix)))        
+        # we need to delete the first row that came from np.empty before normalizing.
+        beerFeatures = np.delete(beerFeatures, 0, 0)
+        normalized = normalize(normalized, axis = 0, norm = 'l1')
+        for i in range(beerList):
+            b.setBeerFeaturesMatrix(normalized[i,:].tolist())
+####
+
+    if getUser == True:            
         userInputFile = 'User Input\\User Input.xlsx'
         wb = load_workbook(userInputFile)
         index = 1
         wb.active = index
         sheet = wb.active
-
         userBeerList = []
         userCV = []
 
@@ -169,7 +240,7 @@ def loadBeerInformation(getUser = False, getCategoryDictionary = False):
             userCV.append(beerCV)
             index += 1
         if getCategoryDictionary == True:
-            return beerList, userBeerList, userCV, dictionary
+            return beerList, userBeerList, userCV, categoryDictionary
         else:
             return beerList, userBeerList, userCV
     return beerList
@@ -182,8 +253,23 @@ def loadBeerInformation(getUser = False, getCategoryDictionary = False):
 # k is the number of neighbors we will be looking for.
 
 
-def calculateEuclideanDistance(data, predict):
+def __calculateEuclideanDistance(data, predict):
+    ''' Calculate Euclidean Distance using beer features matrix
+    
+    Parameters
+    ----------
+    data : list
+        list of a BeerClass\'s features matrix
 
+    predict : list
+        list of a BeerClass\'s features matrix
+
+    Returns
+    ----------
+    euclideanDistance : float
+        the euclidean distance between two sets of beer features matrices    
+
+    '''
     euclideanDistance = np.linalg.norm(np.array(data) - np.array(predict))
 
     return euclideanDistance
@@ -193,6 +279,33 @@ def calculateEuclideanDistance(data, predict):
 # calculates all neighbors from data in dictionaries
 
 def calculateAllNN(aBeer, uInput):
+    ''' Calculate the nearest neighbors between all beer objects in dataset and all user input
+    
+    Parameters
+    ----------
+    aBeer : dict
+        dictionary of all BeerClass objects in dataset
+        key-values beerKey : features matrix
+
+    uInput : dict
+        dictionary of user input BeerClass objects
+
+    Returns
+    ----------
+    results : dict
+        dictionary of user input keys as keys and all BeerClass keys
+        and all BeerClass keys with their distances from user input as values
+        the values to user input keys are sorted by distance in ascending order
+        layout below
+        
+        result = 
+        {
+            userInputKey1: { {allBeerKey1: distance1}, {allBeerKey2, distance2}, ... }
+            userInputKey2: { {allBeerKey1: distance1}, {allBeerKey2, distance2}, ... }
+                 ....
+        }
+
+    '''
     
     results = {}    # dictionary of dictionaries to be returned, set up as each user beer key as the key,
                     # and the value being a dictionary of each beer in all beer with the all beer key as the key and the all beer distance as the value
@@ -210,7 +323,7 @@ def calculateAllNN(aBeer, uInput):
 
         # for each of the 5600 beers in our data, determine the distance between the current user input
         for bkey, bval in aBeer.items():
-            distances.append([calculateEuclideanDistance(bval, uval), bkey, bval])
+            distances.append([__calculateEuclideanDistance(bval, uval), bkey, bval])
             
         # sort by shortest distance to the current user input
         distances = sorted(distances)
@@ -223,10 +336,35 @@ def calculateAllNN(aBeer, uInput):
 
 
 #**********************************************************************************************************************************
-# functions to print recommendations based on each  userPredict beer.
+# functions to print recommendations based on each userPredict beer.
 
 def printBNearestNeighbors(data, aBeer, k, userInput):
+    ''' Print recommendations based on the results of kNN algorithm
+    Also prints graphical representation of the results
+    
+    Parameters
+    ----------
+    data : dict
+        dictionary obtained from calculateAllNN(data, predict)
 
+        data = 
+        {
+            userInputKey1: { {allBeerKey1: distance1}, {allBeerKey2, distance2}, ... }
+            userInputKey2: { {allBeerKey1: distance1}, {allBeerKey2, distance2}, ... }
+                 ....
+        }
+        
+    aBeer : dict
+        dictionary of key-values beerKey : features matrix
+    
+    k : int
+        k-nearest neighbors
+
+    userInput :
+        dictionary of key-values userInputKey : features matrix    
+
+    '''
+    
     for dKey, dVal in data.items():
         knn = {}    # a dictionary of dictionaries, with the user input being the first entry of knn dictionary.
         currentUserInputBeer = BeerClass.Beer()
@@ -256,17 +394,16 @@ def printBNearestNeighbors(data, aBeer, k, userInput):
                     break
             if atK == True:
                 break
-        graphRecommendations(knn)
+        __graphRecommendations(knn)
 #    return knn
+
 
 #******************************************************************************************************************
 # Graphing the user input features and the b nearest neighbors recommended.
 
-
-def graphRecommendations(data):
+def __graphRecommendations(data):
     fig = plt.figure(figsize = (12, 12))
     ax = plt.subplot(polar = 'True')    
-    MAX_NUMBER_OF_FEATURES = 11
     featureLabels = ['Astringency', 'Body', 'Alcoholic', 'Bitter', 'Sweet', 'Sour', 'Salty', 'Fruity', 'Hoppy', 'Spice', 'Malty']   
     color = ['red', 'green', 'blue', 'yellow', 'cyan', 'magenta', 'brown', 'coral', 'darkgreen', 'gold', 'fuchsia', 'lightblue', 'maroon', 'teal', 'violet']
     currentColor = -1
@@ -308,12 +445,36 @@ def graphRecommendations(data):
 # function to classify the user input's beer style using KNN
 # this function returns KNN distances and classification label.
 
-def classifyNewBeerUsingBeerObjects(aBeer, nBeer, k):    
+def classifyNewBeerUsingBeerObjects(aBeer, nBeer, k):
+    ''' Function that uses kNN to classify a new beer based on optimized k values.
+
+    Parameters
+    ----------
+    aBeer : list
+        list of BeerClass objects in dataset
+        
+
+    nBeer : BeerClass
+        BeerClass object to be classified
+
+    k : int
+        k value for kNN algorithm, used to return the k closest BeerClass objects
+
+    Returns
+    ----------
+    distancesKNN : list
+        list of k-nearest BeerClass objects
+        sorted in ascending order by distance from new BeerClass object
+
+    mostLabelsInDistancesKNN : int
+        integer value representing the most category labels found in k-nearest BeerClass objects
+
+    '''
 
     distancesAll = []
     for beer in aBeer:
     # distancesAll = [euclideanDistance, beerKey, beerStyleKey]
-        distancesAll.append([calculateEuclideanDistance(beer.getBeerFeaturesMatrix(), nBeer.getBeerFeaturesMatrix()), beer.getBeerKey(), beer.getBeerStyle()])
+        distancesAll.append([__calculateEuclideanDistance(beer.getBeerFeaturesMatrix(), nBeer.getBeerFeaturesMatrix()), beer.getBeerKey(), beer.getBeerStyle()])
     distancesSorted = sorted(distancesAll)   # sort the distances by distance from shortest to longest
     distancesKNN = distancesSorted[:k]
     distancesKNN = np.array(distancesKNN)
@@ -329,25 +490,53 @@ def classifyNewBeerUsingBeerObjects(aBeer, nBeer, k):
 # beerStyle = [y]
 # where xN is the feature from the features matrix
 
-def dataSetup(listOfBeerIn, yAvailable = False):
+def dataSetup(listOfBeerIn, yAvailable = False, normalizeFeatures = False):
+    ''' build numpy arrays from a list of beer objects
 
-    beerFeatures = np.empty(11)
-    if yAvailable == True:
-        beerStyle = np.empty(1)
+    Parameters
+    ----------
+    listOfBeerIn : list
+        list of beer objects
+        
+    yAvailable : bool
+        determines if beer object category loaded into numpy arrays
+        defaults to False
+
+    normalizeFeatures : bool
+        determines if the numpy array values need to be normalized
+        defaults to False
+        UNDER CONSTRUCTION
+
+    Returns
+    ----------
+    beerFeatures : numpy array
+        All BeerClass object's features matrix converted to numpy array as x values
+
+    beerStyle : numpy array
+        all BeerClass object's categories converted to numpy array as y values        
+
+    '''
+
+    beerFeatures = np.empty(MAX_NUMBER_OF_FEATURES)
+    beerStyle = np.empty(1)     # if yAvailable == True.
     
     for beer in listOfBeerIn:
         xrow = np.array(beer.getBeerFeaturesMatrix())
-        beerFeatures = np.vstack((beerFeatures, xrow))        
+        beerFeatures = np.vstack((beerFeatures, xrow))            
         if yAvailable == True:
             yrow = np.array(beer.getBeerCategoryKey())
             beerStyle = np.vstack((beerStyle, yrow))
 
-    # we need to delete the first row that came from np.empty, I guess..
-
+    # we need to delete the first row that came from np.empty.
     beerFeatures = np.delete(beerFeatures, 0, 0)
     if yAvailable == True:
         beerStyle = np.delete(beerStyle, 0, 0)
 
+    # normalize features.
+    if normalizeFeatures == True:
+        beerFeatures = normalize(beerFeatures, axis = 0, norm = 'l1')
+        
+        
     if yAvailable == True:
         return beerFeatures, beerStyle
     return beerFeatures
@@ -358,6 +547,25 @@ def dataSetup(listOfBeerIn, yAvailable = False):
 # this will hopefully save some time.
 
 def getSortedDistancesUsingNumpy(aBeer, nBeer, style):
+    ''' Use numpy arrays created in dataSetup to calculate Euclidean distances of beer objects
+
+    Parameters
+    ----------
+    aBeer : numpy array
+        dataset of all BeerClass object\'s features matrix in numpy format
+        
+    nBeer : BeerClass object
+        new BeerClass object\'s features matrix in numpy format
+        
+    style : numpy array
+        dataset of all BeerClass object\' categorys keys in numpy format
+
+    Returns
+    ----------
+    distancesSorted : list
+        BeerClass objects sorted by distance from new BeerClass object in ascending order
+
+     '''
 
 
     # calculate euclidean distance between new beer and each beer in all beer.
@@ -373,6 +581,25 @@ def getSortedDistancesUsingNumpy(aBeer, nBeer, style):
 # Optimizing K
 
 def optimizeKUsingNumpy(data, style, maxTrainingLabelsCount):
+    ''' Use test BeerClass set formatted as numpy arrays created in dataSetup to find optimized values of k for kNN algorithm
+
+    Parameters
+    ----------
+    data : numpy array
+        dataset of all BeerClass object\'s features matrix in numpy format
+        
+    style : numpy array
+        dataset of all BeerClass object\' categorys keys in numpy format
+
+    maxTrainingLabelsCount : int
+        max number of BeerClass objects from each category to use for training (80%)
+
+    Returns
+    ----------
+    K : list
+        list of ideal values of k to use for classification, returns only those that are 100% accurate
+
+     '''
 
     highestAccuracyAtK = [0] * len(data)
     accuracyLimit = .8
@@ -414,6 +641,20 @@ def optimizeKUsingNumpy(data, style, maxTrainingLabelsCount):
 # function to test our optimized K values
 
 def testOptimizedKUsingNumpy(data, style, K):
+    ''' Use ideal values of k on test set of BeerClass objects
+
+    Parameters
+    ----------
+    data : numpy array
+        dataset of all BeerClass object\'s features matrix in numpy format
+        
+    style : numpy array
+        dataset of all BeerClass object\' categorys keys in numpy format
+
+    K : list
+        ideal values of k derived from testing data set
+
+    '''
 
     # results will be [[k, highest accuracy, average accuracy, lowest accuracy]]    
     highestAccuracyAtK = []
@@ -454,6 +695,34 @@ def testOptimizedKUsingNumpy(data, style, K):
 # Function to classify a new beer based on optimized K nearest neigbors.
 
 def classifyANewBeerUsingNumpy(aBeerFeatures, aBeerStyles, uBeerFeatures, K, name, classDictionary):
+    '''Use dataset formatted as numpy arrays created in dataSetup to find optimized values of k for kNN algorithm
+
+    Parameters
+    ----------
+    aBeerFeatures : numpy array
+        dataset of all BeerClass object\'s features matrix in numpy format
+        
+    aBeerStyles : numpy array
+        dataset of all BeerClass object\' categorys keys in numpy format
+
+    uBeerFeatures : numpy array
+        dataset of a new BeerClass object\'s features matrix in numpy format
+
+    K : int
+        ideal values of k derived from testing data set
+
+    name : str
+        name of new BeerClass object being classified
+
+    classDictionary : dict
+        key-values of category keys as keys and category names as values
+
+    Returns
+    ----------
+    mostCommonStylesAtK : list
+        list of the most frequent or common styles in k-nearest neighbors
+
+    '''
     
     allSortedDistances = getSortedDistancesUsingNumpy(aBeerFeatures, uBeerFeatures, aBeerStyles)
     accuracyIndexer = -1
@@ -470,13 +739,13 @@ def classifyANewBeerUsingNumpy(aBeerFeatures, aBeerStyles, uBeerFeatures, K, nam
             dist.append(i[0])
             style.append(i[1])
         graphingData.update({k: [dist, style]})
-    graphClassifications(graphingData, name, classDictionary)
+    __graphClassifications(graphingData, name, classDictionary)
     return mostCommonStylesAtK
 
 #*****************************************************************************************************************
 # function that graphs the features of a new beer and the features using colors to represent classifications of the k nearest neighbors. 
 
-def graphClassifications(data, title, classDictionary):
+def __graphClassifications(data, title, classDictionary):
     
     color = ['red', 'green', 'blue', 'yellow', 'cyan', 'magenta', 'brown', 'coral', 'darkgreen', 'gold', 'fuchsia', 'lightblue', 'maroon', 'teal', 'violet']
     # here we unpack our data.
@@ -511,8 +780,9 @@ def graphClassifications(data, title, classDictionary):
     plt.show()
     
 #*******************************************************************************************************************************
-# Main Menu Option 2
+# Main Menu Options
 def main():
+    ''' Starts a menu format for running classification and recommendation '''
    
     # empty dictionaries of recommendations based on neighbors to userPredict based on different sets of features.
     # our lists of beer objects
@@ -656,4 +926,6 @@ def main():
             choice = -1  
         else:
             break
-main()
+
+if __name__ == "__main__":
+    main()
