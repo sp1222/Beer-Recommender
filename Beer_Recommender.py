@@ -54,6 +54,7 @@ MAX_NUMBER_OF_FEATURES = 11
 # File Names:
 BEER_ALL_INFO = 'Beer_All_Info\\'
 FILE_DIRECTORY = 'D:\\Python Projects\\Beer Recommender Project\\'
+USER_INPUT_DIRECTORY = 'User Input\\'
 
 
 #********************************************************************************************************************************
@@ -174,8 +175,7 @@ def loadBeerInformation(getUser = False, getCategoryDictionary = False, normaliz
 ####
 
     if getUser == True:            
-        userInputFile = 'User Input\\User Input.xlsx'
-        wb = load_workbook(userInputFile)
+        wb = load_workbook(USER_INPUT_DIRECTORY + 'User Input.xlsx')
         index = 1
         wb.active = index
         sheet = wb.active
